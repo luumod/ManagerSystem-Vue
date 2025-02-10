@@ -4,9 +4,10 @@
 
     <!-- 中心内容区域-->
     <div class="tabs">
-      <el-tabs type="border-card" stretch v-model="activeName">
+      <el-tabs type="border-card" stretch v-model="activeTab">
         <!-- 账号登录 -->
         <el-tab-pane label="账号登录" name="account">
+          <!-- 具名插槽-->
           <template #label>
             <el-icon><User /></el-icon>
             <span class="text">账号登陆</span>
@@ -16,7 +17,7 @@
         </el-tab-pane>
 
         <!-- 手机登录 -->
-        <el-tab-pane label="手机登录" name="phone">
+        <el-tab-pane label="手机登录" name="phone" lazy>
           <template #label>
             <el-icon><Iphone /></el-icon>
             <span class="text">手机登录</span>
@@ -43,15 +44,16 @@ import LoginAccount from '@/views/login/c-cpns/login-account.vue';
 import LoginPhone from '@/views/login/c-cpns/login-phone.vue';
 
 const isRememberPwd = ref(false);
-//v-model="activeName"
-const activeName = ref<string>('account');
+//v-model="activeTab"
+const activeTab = ref<string>('account');
 
 //InstanceType<typeof LoginAccount> <==> LoginAccount
 //获取子组件的实例：InstanceType<typeof LoginAccount>
 const accountRef = ref<InstanceType<typeof LoginAccount>>();
 
 function handleLogin() {
-  if (activeName.value === 'account') {
+  if (activeTab.value === 'account') {
+    debugger;
     //1. 获取子组件的实例: ref
     //2. 调用子组件的方法: loginAction
     accountRef.value?.loginAction(); //可选链：一开始为null
