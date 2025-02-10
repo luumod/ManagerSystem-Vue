@@ -12,19 +12,15 @@ export const hyRequest2 = new HYRequest({
 
   interceptors: {
     requestSuccessFn: (config) => {
-      console.log('requestSuccessFn', config);
       return config;
     },
     requestFailFn: (error) => {
-      console.log('requestFailFn', error);
       return error;
     },
     responseSuccessFn: (response) => {
-      console.log('responseSuccessFn', response);
       return response;
     },
     responseFailFn: (error) => {
-      console.log('responseFailFn', error);
       return error;
     }
   }
