@@ -5,6 +5,7 @@
       "@/*": ["./src/*"]
     },
     "noImplicitAny": false
+    //"types": ["element-plus/global"]
   },
   "references": [
     {
