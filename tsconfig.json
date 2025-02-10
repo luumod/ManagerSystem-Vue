@@ -1,9 +1,10 @@
 {
   "files": [],
-  "compilerOptions":{
+  "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "noImplicitAny": false
   },
   "references": [
     {
