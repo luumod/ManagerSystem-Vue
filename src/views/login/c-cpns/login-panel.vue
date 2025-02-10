@@ -29,7 +29,11 @@
 
     <!-- 底部区域 -->
     <div class="controls">
-      <el-checkbox v-model="isRememberPwd" label="记住密码"></el-checkbox>
+      <div class="login-assistance">
+        <el-checkbox v-model="isRememberPwd" label="记住密码"></el-checkbox>
+        <el-checkbox v-model="isAutoLoginComputed" label="自动登录"></el-checkbox>
+      </div>
+
       <el-link type="primary">忘记密码</el-link>
     </div>
     <el-button type="primary" class="login-btn" size="large" @click="handleLogin"
@@ -39,18 +43,31 @@
 </template>
 
 <script setup lang="ts" name="login-panel">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import LoginAccount from '@/views/login/c-cpns/login-account.vue';
 import LoginPhone from '@/views/login/c-cpns/login-phone.vue';
 
 const isRememberPwd = ref(false);
+const isAutoLogin = ref(false);
 //v-model="activeTab"
 const activeTab = ref<string>('account');
+
+// 自动登录与记住密码之间的逻辑
+const isAutoLoginComputed = computed({
+  get: () => isAutoLogin.value,
+  set: (newValue) => {
+    isAutoLogin.value = newValue;
+    if (newValue) {
+      isRememberPwd.value = true;
+    }
+  }
+});
 
 //InstanceType<typeof LoginAccount> <==> LoginAccount
 //获取子组件的实例：InstanceType<typeof LoginAccount>
 const accountRef = ref<InstanceType<typeof LoginAccount>>();
 
+//点击登录
 function handleLogin() {
   if (activeTab.value === 'account') {
     debugger;
@@ -93,5 +110,9 @@ function handleLogin() {
   width: 100%;
 
   --el-button-size: 45px;
+}
+
+.login-assistance {
+  justify-content: center;
 }
 </style>
