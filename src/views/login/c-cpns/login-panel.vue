@@ -11,7 +11,8 @@
             <el-icon><User /></el-icon>
             <span class="text">账号登陆</span>
           </template>
-          <LoginAccount></LoginAccount>
+          <!-- ref获取子组件的实例（获取子组件中defineExpose的方法） -->
+          <LoginAccount ref="accountRef"></LoginAccount>
         </el-tab-pane>
 
         <!-- 手机登录 -->
@@ -42,12 +43,18 @@ import LoginAccount from '@/views/login/c-cpns/login-account.vue';
 import LoginPhone from '@/views/login/c-cpns/login-phone.vue';
 
 const isRememberPwd = ref(false);
-
 //v-model="activeName"
 const activeName = ref<string>('account');
+
+//InstanceType<typeof LoginAccount> <==> LoginAccount
+//获取子组件的实例：InstanceType<typeof LoginAccount>
+const accountRef = ref<InstanceType<typeof LoginAccount>>();
+
 function handleLogin() {
   if (activeName.value === 'account') {
-    console.log('账号登录');
+    //1. 获取子组件的实例: ref
+    //2. 调用子组件的方法: loginAction
+    accountRef.value?.loginAction(); //可选链：一开始为null
   } else {
     console.log('手机登录');
   }
