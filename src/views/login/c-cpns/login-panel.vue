@@ -5,21 +5,22 @@
     <!-- 中心内容区域-->
     <div class="tabs">
       <el-tabs type="border-card" stretch v-model="activeName">
+        <!-- 账号登录 -->
         <el-tab-pane label="账号登录" name="account">
           <template #label>
             <el-icon><User /></el-icon>
             <span class="text">账号登陆</span>
           </template>
-          <div>账号</div>
-          <div>密码</div>
+          <LoginAccount></LoginAccount>
         </el-tab-pane>
+
+        <!-- 手机登录 -->
         <el-tab-pane label="手机登录" name="phone">
           <template #label>
             <el-icon><Iphone /></el-icon>
             <span class="text">手机登录</span>
           </template>
-          <div>手机号</div>
-          <div>验证码</div>
+          <LoginPhone></LoginPhone>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -37,6 +38,8 @@
 
 <script setup lang="ts" name="login-panel">
 import { ref } from 'vue';
+import LoginAccount from '@/views/login/c-cpns/login-account.vue';
+import LoginPhone from '@/views/login/c-cpns/login-phone.vue';
 
 const isRememberPwd = ref(false);
 
