@@ -1,9 +1,6 @@
 <template>
   <div class="App">
-    <h2>App</h2>
-    <RouterLink to="/main">主页</RouterLink>
-    <RouterLink to="/login">登录</RouterLink>
-    <RouterView></RouterView>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -11,7 +8,7 @@
 
 <style scoped>
 .App {
-  background-color: aquamarine;
+  background-color: rgb(255, 255, 255);
   height: 100vh;
   width: 100vw;
 }
