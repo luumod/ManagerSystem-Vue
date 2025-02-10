@@ -5,15 +5,14 @@
 </template>
 
 <script setup lang="ts" name="login">
-import hyRequest from '@/service';
-
-hyRequest
-  .get({
-    url: '/home/multidata'
-  })
-  .then((res: any) => {
-    console.log(res);
-  });
+//import hyRequest from '@/service';
+// hyRequest
+//   .get({
+//     url: '/home/multidata'
+//   })
+//   .then((res: any) => {
+//     console.log(res);
+//   });
 </script>
 
 <style scoped>
