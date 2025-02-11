@@ -13,14 +13,6 @@
       <el-form-item label="密码" prop="password">
         <el-input show-password v-model="userAccount.password" />
       </el-form-item>
-
-      <el-form-item label="性别" prop="gender">
-        <el-radio-group v-model="userAccount.gender">
-          <el-radio value="男">男</el-radio>
-          <el-radio value="女">女</el-radio>
-          <el-radio value="未知">未知</el-radio>
-        </el-radio-group>
-      </el-form-item>
     </el-form>
   </div>
 </template>
@@ -30,12 +22,12 @@ import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import type { ElForm, FormRules } from 'element-plus';
 import useLoginStore from '@/store/login';
+import type { IUserAccount } from '@/types';
 
 //定义account数据
-const userAccount = reactive({
+const userAccount = reactive<IUserAccount>({
   user_account: '',
-  password: '',
-  gender: ''
+  password: ''
 });
 //定义校验规则
 const accountRules: FormRules = {
@@ -56,7 +48,7 @@ const loginStore = useLoginStore();
 
 //执行账号登录逻辑
 function loginAction() {
-  console.log('loginAction', userAccount.user_account, userAccount.password, userAccount.gender); //利用axios发送请求
+  console.log('loginAction', userAccount.user_account, userAccount.password); //利用axios发送请求
   if (!formRef.value) {
     return;
   }

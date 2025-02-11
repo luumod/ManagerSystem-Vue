@@ -1,4 +1,5 @@
 import { accountLoginRequest } from '@/service/login';
+import type { IUserAccount } from '@/types';
 import { defineStore } from 'pinia';
 
 const useLoginStore = defineStore('login', {
@@ -9,7 +10,7 @@ const useLoginStore = defineStore('login', {
   }),
   actions: {
     //acitons内支持异步操作
-    async accountLoginAction(userAccount: any) {
+    async accountLoginAction(userAccount: IUserAccount) {
       const res = await accountLoginRequest(userAccount); //await accountLoginRequest(userAccount);
       console.log(res);
       this.id = res.data.id;
