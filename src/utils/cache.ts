@@ -16,7 +16,7 @@ class Cache {
       this.storage.setItem(key, JSON.stringify(value));
     }
   }
-  getCache(key: string) {
+  getCache(key: string){
     const value = this.storage.getItem(key);
     if (value) {
       return JSON.parse(value);

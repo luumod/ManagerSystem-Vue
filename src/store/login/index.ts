@@ -3,8 +3,7 @@ import type { IUserAccount } from '@/types';
 import { defineStore } from 'pinia';
 import { localCache } from '@/utils/cache';
 import router from '@/router';
-import {LOGIN_TOKEN} from '@/global/constants'
-
+import { LOGIN_TOKEN } from '@/global/constants';
 
 const useLoginStore = defineStore('login', {
   state: () => ({
@@ -18,11 +17,6 @@ const useLoginStore = defineStore('login', {
       //1. 账号登录，获取token
       const res = await accountLoginRequest(userAccount); //await accountLoginRequest(userAccount);
       console.log(res);
-      if (res.code !== 0) {
-        //登录失败
-        console.log('登录失败');
-        return;
-      }
       this.id = res.data.id;
       this.token = res.data.token;
       this.user_name = res.data.user_name;

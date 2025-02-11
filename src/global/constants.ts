@@ -1,1 +1,4 @@
-export const LOGIN_TOKEN = 'login/token';
+const LOGIN_TOKEN = 'login/token';
+
+
+export { LOGIN_TOKEN };

@@ -23,11 +23,15 @@ import { ElMessage } from 'element-plus';
 import type { ElForm, FormRules } from 'element-plus';
 import useLoginStore from '@/store/login';
 import type { IUserAccount } from '@/types';
+import { localCache } from '@/utils/cache';
+
+const LOGIN_USER_ACCOUNT = 'login/user_account';
+const LOGIN_PASSWORD = 'login/password';
 
 //定义account数据
 const userAccount = reactive<IUserAccount>({
-  user_account: '',
-  password: ''
+  user_account: localCache.getCache(LOGIN_USER_ACCOUNT) ?? '',
+  password: localCache.getCache(LOGIN_PASSWORD) ?? ''
 });
 //定义校验规则
 const accountRules: FormRules = {
@@ -47,7 +51,7 @@ const formRef = ref<InstanceType<typeof ElForm>>();
 const loginStore = useLoginStore();
 
 //执行账号登录逻辑
-function loginAction() {
+function loginAction(isRemPwd: boolean) {
   console.log('loginAction', userAccount.user_account, userAccount.password); //利用axios发送请求
   if (!formRef.value) {
     return;
@@ -60,7 +64,16 @@ function loginAction() {
       const password = userAccount.password;
 
       //2. 发送网络请求（丢弃响应式）
-      loginStore.accountLoginAction({ user_account, password });
+      loginStore.accountLoginAction({ user_account, password }).then((res) => {
+        //3. 判断是否需要记住密码
+        if (isRemPwd) {
+          localCache.setCache(LOGIN_USER_ACCOUNT, user_account);
+          localCache.setCache(LOGIN_PASSWORD, password);
+        } else {
+          localCache.removeCache(LOGIN_USER_ACCOUNT);
+          localCache.removeCache(LOGIN_PASSWORD);
+        }
+      });
     } else {
       ElMessage.error('Oops, 信息格式输入错误.');
     }

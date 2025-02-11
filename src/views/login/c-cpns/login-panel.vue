@@ -31,7 +31,7 @@
     <div class="controls">
       <div class="login-assistance">
         <el-checkbox v-model="isRememberPwd" label="记住密码"></el-checkbox>
-        <el-checkbox v-model="isAutoLoginComputed" label="自动登录"></el-checkbox>
+        <el-checkbox v-model="isAutoLogin" label="自动登录"></el-checkbox>
       </div>
 
       <el-link type="primary">忘记密码</el-link>
@@ -43,23 +43,34 @@
 </template>
 
 <script setup lang="ts" name="login-panel">
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 import LoginAccount from '@/views/login/c-cpns/login-account.vue';
 import LoginPhone from '@/views/login/c-cpns/login-phone.vue';
+import { localCache } from '@/utils/cache';
 
-const isRememberPwd = ref(false);
-const isAutoLogin = ref(false);
+const CACHE_REMEMBER_PWD = 'login/isRememberPwd';
+const CACHE_AUTO_LOGIN = 'login/isAutoLogin';
+
+const isRememberPwd = ref<boolean>(localCache.getCache(CACHE_REMEMBER_PWD) ?? false);
+const isAutoLogin = ref<boolean>(localCache.getCache(CACHE_AUTO_LOGIN) ?? false);
 //v-model="activeTab"
 const activeTab = ref<string>('account');
 
 // 自动登录与记住密码之间的逻辑
-const isAutoLoginComputed = computed({
-  get: () => isAutoLogin.value,
-  set: (newValue) => {
-    isAutoLogin.value = newValue;
-    if (newValue) {
-      isRememberPwd.value = true;
-    }
+watch(isAutoLogin, (isAuto) => {
+  if (isAuto) {
+    localCache.setCache(CACHE_AUTO_LOGIN, true);
+    isRememberPwd.value = true;
+  } else {
+    localCache.removeCache(CACHE_AUTO_LOGIN);
+  }
+});
+watch(isRememberPwd, (isRem) => {
+  if (isRem) {
+    localCache.setCache(CACHE_REMEMBER_PWD, isRem);
+  } else {
+    localCache.removeCache(CACHE_REMEMBER_PWD);
+    isAutoLogin.value = false;
   }
 });
 
@@ -72,7 +83,7 @@ function handleLogin() {
   if (activeTab.value === 'account') {
     //1. 获取子组件的实例: ref
     //2. 调用子组件的方法: loginAction
-    accountRef.value?.loginAction(); //可选链：一开始为null
+    accountRef.value?.loginAction(isRememberPwd.value); //可选链：一开始为null
   } else {
     console.log('手机登录');
   }
