@@ -70,7 +70,6 @@ const accountRef = ref<InstanceType<typeof LoginAccount>>();
 //点击登录
 function handleLogin() {
   if (activeTab.value === 'account') {
-    debugger;
     //1. 获取子组件的实例: ref
     //2. 调用子组件的方法: loginAction
     accountRef.value?.loginAction(); //可选链：一开始为null

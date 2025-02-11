@@ -8,14 +8,14 @@
 let BASE_URL = '';
 if (import.meta.env.PROD) {
   //生产环境
-  BASE_URL = 'http://codercba.prod:8000';
+  BASE_URL = 'http://localhost:8888';
 } else {
   //开发环境
-  BASE_URL = 'http://codercba.com:8000';
+  BASE_URL = 'http://localhost:8888';
 }
 
 //创建.env
-console.log(import.meta.env); //可以读取到.env文件中的环境变量
+// console.log(import.meta.env); //可以读取到.env文件中的环境变量
 
 export const TIME_OUT = 10000;
 export { BASE_URL };

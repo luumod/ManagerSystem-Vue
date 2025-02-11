@@ -1,5 +1,5 @@
 <template>
-  <div class="login-account">
+  <div class="login-user_account">
     <el-form
       label-width="60px"
       ref="formRef"
@@ -7,8 +7,8 @@
       :rules="accountRules"
       status-icon
     >
-      <el-form-item label="账号" prop="account">
-        <el-input v-model="userAccount.account" />
+      <el-form-item label="账号" prop="user_account">
+        <el-input v-model="userAccount.user_account" />
       </el-form-item>
       <el-form-item label="密码" prop="password">
         <el-input show-password v-model="userAccount.password" />
@@ -25,20 +25,21 @@
   </div>
 </template>
 
-<script setup lang="ts" name="login-account">
+<script setup lang="ts" name="login-user_account">
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import type { ElForm, FormRules } from 'element-plus';
+import useLoginStore from '@/store/login';
 
 //定义account数据
 const userAccount = reactive({
-  account: '',
+  user_account: '',
   password: '',
   gender: ''
 });
 //定义校验规则
 const accountRules: FormRules = {
-  account: [
+  user_account: [
     { required: true, message: '请输入账号', trigger: 'blur' },
     { pattern: /^[a-zA-Z0-9]{6,20}$/, message: '必须是6-20位的数字或字母组成', trigger: 'blur' }
   ],
@@ -51,16 +52,23 @@ const accountRules: FormRules = {
 
 //获取form
 const formRef = ref<InstanceType<typeof ElForm>>();
+const loginStore = useLoginStore();
 
 //执行账号登录逻辑
 function loginAction() {
-  console.log('loginAction', userAccount.account, userAccount.password, userAccount.gender); //利用axios发送请求
+  console.log('loginAction', userAccount.user_account, userAccount.password, userAccount.gender); //利用axios发送请求
   if (!formRef.value) {
     return;
   }
   formRef.value?.validate((valid) => {
     if (valid) {
       ElMessage.success('qwe, 正在准备登录~');
+      //1. 获取账号密码
+      const user_account = userAccount.user_account;
+      const password = userAccount.password;
+
+      //2. 发送网络请求（丢弃响应式）
+      loginStore.accountLoginAction({ user_account, password });
     } else {
       ElMessage.error('Oops, 信息格式输入错误.');
     }
@@ -73,7 +81,7 @@ defineExpose({
 </script>
 
 <style scoped>
-.login-account {
+.login-user_account {
   color: red;
 }
 </style>
