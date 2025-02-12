@@ -8,7 +8,7 @@ import type { IUserAccount } from '@/types';
  */
 export function accountLoginRequest(userAccount: IUserAccount) {
   return hyRequest.post({
-    url: '/api/login',
+    url: `/api/login`,
     data: userAccount //params
   });
 }
@@ -24,5 +24,11 @@ export function getUserInfoById(id: number) {
     // headers: { //添加请求时拦截即可
     //   Authorization: localCache.getCache(LOGIN_TOKEN)
     // }
+  });
+}
+
+export function getUserMenusByRoleId(roleId: number) {
+  return hyRequest.get({
+    url: `/role/${roleId}/menu`
   });
 }
