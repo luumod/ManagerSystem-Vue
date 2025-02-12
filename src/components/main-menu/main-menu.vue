@@ -2,10 +2,11 @@
   <div class="main-menu">
     <div class="logo">
       <img class="img" src="@/assets/img/logo.svg" />
-      <h2 class="title">图片管理系统</h2>
+      <h2 v-show="!isFold" class="title">图片管理系统</h2>
     </div>
     <div class="menu">
       <el-menu
+        :collapse="isFold"
         default-active="12"
         text-color="#b7bdc3"
         active-text-color="#fff"
@@ -30,7 +31,9 @@
             <el-icon>
               <component :is="item.icon.split('-icon-')[1]" />
             </el-icon>
-            {{ item.name }}
+            <template #title>
+              <span>{{ item.name }}</span>
+            </template>
           </el-menu-item>
         </template>
       </el-menu>
@@ -40,6 +43,13 @@
 
 <script setup lang="ts" name="main-menu">
 import useLoginStore from '@/store/login';
+
+defineProps({
+  isFold: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const loginStore = useLoginStore();
 const user_menus = loginStore.user_menus;
@@ -62,7 +72,7 @@ function hasChildren(item: any): boolean {
 
 .logo {
   display: flex;
-  height: 60px;
+  height: 40px;
   padding: 5px 5px 5px 5px;
   flex-direction: row;
   justify-content: flex-start;
