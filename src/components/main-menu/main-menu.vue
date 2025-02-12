@@ -50,7 +50,7 @@ import { active_menu, mapPathToMenu } from '@/utils/map-menus';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-//1. 接收父类传参，保存折叠状态
+//0. 接收父类传参
 defineProps({
   isFold: {
     type: Boolean,
@@ -60,17 +60,18 @@ defineProps({
 
 const loginStore = useLoginStore();
 const user_menus = loginStore.user_menus;
-console.log(user_menus);
 
-//1.
+//1. 检查是否有子菜单
 function hasChildren(item: any): boolean {
   return item.children && item.children.length > 0;
 }
 
+//2. 点击菜单项--跳转页面
 function onClickedMenuItem(item: any) {
   router.push(item.url);
 }
 
+//3. 监听路径变化，保持菜单的选中状态
 const route = useRoute();
 mapPathToMenu(route.path, user_menus);
 const default_active = ref(active_menu.id + '');
