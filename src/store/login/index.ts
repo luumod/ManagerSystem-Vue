@@ -38,7 +38,7 @@ const useLoginStore = defineStore('login', {
       this.user_menus = userMenusRes.data;
       console.log(userMenusRes);
 
-      //4. 登录成功，页面跳转
+      //end. 登录成功，页面跳转
       router.push('/main');
     }
   }
