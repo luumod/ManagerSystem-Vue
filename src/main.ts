@@ -7,8 +7,8 @@ import './assets/css/index.less'; //npm install less -D
 // import ElementPlus from 'element-plus';
 // app.use(ElementPlus);
 import router from './router';
+import icons from './global/register-icons';
 import pinia from './store';
-import registerIcons from './global/register-icons';
 
 //1. 样式全局引入
 //import 'element-plus/dist/index.css';
@@ -24,7 +24,7 @@ import registerIcons from './global/register-icons';
 
 // 自动注册
 const app = createApp(App);
-app.use(registerIcons); //参数自动传递为app
+app.use(icons); //参数自动传递为app
+app.use(pinia); 
 app.use(router);
-app.use(pinia);
 app.mount('#app');

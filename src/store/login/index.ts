@@ -25,6 +25,10 @@ const useLoginStore = defineStore('login', {
   }),
   actions: {
     //acitons内支持异步操作
+    /**
+     *
+     * @param userAccount
+     */
     async accountLoginAction(userAccount: IUserAccount) {
       //1. 账号登录，获取token
       const res = await accountLoginRequest(userAccount); //await accountLoginRequest(userAccount);
@@ -53,6 +57,22 @@ const useLoginStore = defineStore('login', {
 
       //end. 登录成功，页面跳转
       router.push('/main');
+    },
+
+    loadLocalCacheAction() {
+      const token = localCache.getCache(LOGIN_TOKEN);
+      const user_info = localCache.getCache(USER_INFO);
+      const user_menus = localCache.getCache(USER_MENUS);
+      if (token && user_info && user_menus) {
+        // 个人信息缓存
+        this.token = token;
+        this.user_info = user_info;
+        this.user_menus = user_menus;
+
+        // 动态路由缓存
+        const routes = mapMenusToRoutes(user_menus);
+        routes.forEach((route) => router.addRoute('main', route));
+      }
     }
   }
 });
