@@ -32,7 +32,6 @@ import MainHeader from '@/components/main-header/main-header.vue';
 
 <style scoped lang="less">
 .main {
-  color: red;
   height: 100%;
 }
 
@@ -40,15 +39,24 @@ import MainHeader from '@/components/main-header/main-header.vue';
   height: 100%;
 
   .el-aside {
-    background-color: antiquewhite;
-  }
+    overflow-x: hidden;
+    overflow-y: auto;
+    line-height: 200px;
+    text-align: left;
+    cursor: pointer;
+    background-color: #001529;
+    scrollbar-width: none; /* firefox */
+    -ms-overflow-style: none;  
 
-  .el-header {
-    background-color: aquamarine;
+    transition: width 0.3s ease;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .el-main {
-    background-color: burlywood;
+    background-color: #f0f2f5;
   }
 }
 </style>

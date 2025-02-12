@@ -5,42 +5,54 @@
       <h2 class="title">图片管理系统</h2>
     </div>
     <div class="menu">
-      <el-menu default-active="2">
-        <el-sub-menu index="1">
-          <template #title>
-            <el-icon><location /></el-icon>
-            <span>Navigator One</span>
-          </template>
-          <el-menu-item-group title="Group One">
-            <el-menu-item index="1-1">item one</el-menu-item>
-            <el-menu-item index="1-2">item two</el-menu-item>
-          </el-menu-item-group>
-          <el-menu-item-group title="Group Two">
-            <el-menu-item index="1-3">item three</el-menu-item>
-          </el-menu-item-group>
-          <el-sub-menu index="1-4">
-            <template #title>item four</template>
-            <el-menu-item index="1-4-1">item one</el-menu-item>
+      <el-menu
+        default-active="12"
+        text-color="#b7bdc3"
+        active-text-color="#fff"
+        background-color="#001529"
+      >
+        <!-- 遍历整个菜单 -->
+        <template v-for="item in user_menus" v-bind:key="item.id">
+          <!-- 如果有children 就渲染子菜单 -->
+          <el-sub-menu v-if="hasChildren(item)" :index="item.id + ''">
+            <template #title>
+              <el-icon>
+                <component :is="item.icon.split('-icon-')[1]" />
+              </el-icon>
+              <span>{{ item.name }}</span>
+            </template>
+            <template v-for="subItem in item.children" :key="subItem.id">
+              <el-menu-item :index="subItem.id + ''">{{ subItem.name }}</el-menu-item>
+            </template>
           </el-sub-menu>
-        </el-sub-menu>
-        <el-menu-item index="2">
-          <el-icon><icon-menu /></el-icon>
-          <span>Navigator Two</span>
-        </el-menu-item>
-        <el-menu-item index="3" disabled>
-          <el-icon><document /></el-icon>
-          <span>Navigator Three</span>
-        </el-menu-item>
-        <el-menu-item index="4">
-          <el-icon><setting /></el-icon>
-          <span>Navigator Four</span>
-        </el-menu-item>
+          <!-- 如果没有children，则当前项就是el-menu-item -->
+          <el-menu-item v-else :index="item.id + ''">
+            <el-icon>
+              <component :is="item.icon.split('-icon-')[1]" />
+            </el-icon>
+            {{ item.name }}
+          </el-menu-item>
+        </template>
       </el-menu>
     </div>
   </div>
 </template>
 
-<script setup lang="ts" name="main-menu"></script>
+<script setup lang="ts" name="main-menu">
+import useLoginStore from '@/store/login';
+
+const loginStore = useLoginStore();
+const user_menus = loginStore.user_menus;
+console.log(user_menus);
+
+/**
+ * 检查当前菜单项中是否有子菜单
+ * @param item 子菜单
+ */
+function hasChildren(item: any): boolean {
+  return item.children && item.children.length > 0;
+}
+</script>
 
 <style scoped lang="less">
 .main-menu {
@@ -67,6 +79,26 @@
     font-weight: 700;
     color: white;
     white-space: nowrap;
+  }
+}
+
+.el-menu {
+  border-right: none;
+  user-select: none;
+}
+
+.el-sub-menu {
+  .el-menu-item {
+    padding-left: 50px !important;
+    background-color: #0c2135;
+  }
+
+  .el-menu-item:hover {
+    color: #fff;
+  }
+
+  .el-menu-item.is-active {
+    background-color: #195493ab;
   }
 }
 </style>

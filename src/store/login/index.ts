@@ -10,13 +10,17 @@ interface ILoginState {
   user_info: any;
   user_menus: any;
 }
+
+const USER_INFO = 'user_info';
+const USER_MENUS = 'user_menus';
+
 const useLoginStore = defineStore('login', {
   state: (): ILoginState => ({
     //注意箭头函数的返回值类型写法
     //proxy类型
     token: localCache.getCache(LOGIN_TOKEN) ?? '', //有则取, 否则为空
-    user_info: {}, //登录的用户的详细信息
-    user_menus: [] //登录用户的菜单
+    user_info: localCache.getCache(USER_INFO) ?? {}, //登录的用户的详细信息
+    user_menus: localCache.getCache(USER_MENUS) ?? [] //登录用户的菜单
   }),
   actions: {
     //acitons内支持异步操作
@@ -26,7 +30,7 @@ const useLoginStore = defineStore('login', {
       this.token = res.data.token;
       const id = res.data.id;
 
-      //2. 进行本地缓存
+      //2. token本地缓存
       localCache.setCache(LOGIN_TOKEN, this.token);
 
       //3. 获取登录用户的详细信息
@@ -37,6 +41,10 @@ const useLoginStore = defineStore('login', {
       const userMenusRes = await getUserMenusByRoleId(this.user_info.image_id);
       this.user_menus = userMenusRes.data;
       console.log(userMenusRes);
+
+      // 个人信息本地缓存
+      localCache.setCache(USER_INFO, this.user_info);
+      localCache.setCache(USER_MENUS, this.user_menus);
 
       //end. 登录成功，页面跳转
       router.push('/main');
