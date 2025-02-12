@@ -2,9 +2,13 @@
   <div class="main">
     <!-- <button @click="exitLogin">退出登录</button> -->
     <el-container class="main-content">
-      <el-aside width="240px">Main</el-aside>
+      <el-aside width="240px">
+        <main-menu></main-menu>
+      </el-aside>
       <el-container>
-        <el-header height="60px">Header</el-header>
+        <el-header height="60px">
+          <main-header></main-header>
+        </el-header>
         <el-main>Main</el-main>
       </el-container>
     </el-container>
@@ -21,6 +25,9 @@
 //   //2. 跳转到登录页面
 //   router.push('/login');
 // }
+
+import MainMenu from '@/components/main-menu/main-menu.vue';
+import MainHeader from '@/components/main-header/main-header.vue';
 </script>
 
 <style scoped lang="less">
