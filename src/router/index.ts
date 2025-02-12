@@ -1,5 +1,6 @@
 import { LOGIN_TOKEN } from '@/global/constants';
 import { localCache } from '@/utils/cache';
+import { first_menu } from '@/utils/map-menus';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
 const router = createRouter({
@@ -20,7 +21,7 @@ const router = createRouter({
     {
       path: '/main',
       name: 'main',
-      component: () => import('@/views/main/Main.vue'),
+      component: () => import('@/views/main/Main.vue')
     }
   ]
 });
@@ -33,6 +34,10 @@ router.beforeEach((to) => {
   const token = localCache.getCache(LOGIN_TOKEN);
   if (to.path.startsWith('/main') && !token) {
     return '/login';
+  }
+
+  if (to.path === '/main') {
+    return first_menu?.url || first_menu?.path || '/login';
   }
 });
 

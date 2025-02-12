@@ -7,7 +7,7 @@
     <div class="menu">
       <el-menu
         :collapse="isFold"
-        default-active="12"
+        :default-active="default_active"
         text-color="#b7bdc3"
         active-text-color="#fff"
         background-color="#001529"
@@ -46,7 +46,11 @@
 <script setup lang="ts" name="main-menu">
 import router from '@/router';
 import useLoginStore from '@/store/login';
+import { active_menu, mapPathToMenu } from '@/utils/map-menus';
+import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 
+//1. 接收父类传参，保存折叠状态
 defineProps({
   isFold: {
     type: Boolean,
@@ -58,18 +62,18 @@ const loginStore = useLoginStore();
 const user_menus = loginStore.user_menus;
 console.log(user_menus);
 
-/**
- * 检查当前菜单项中是否有子菜单
- * @param item 子菜单
- */
+//1.
 function hasChildren(item: any): boolean {
   return item.children && item.children.length > 0;
 }
 
 function onClickedMenuItem(item: any) {
-  console.log(item.url);
   router.push(item.url);
 }
+
+const route = useRoute();
+mapPathToMenu(route.path, user_menus);
+const default_active = ref(active_menu.id + '');
 </script>
 
 <style scoped lang="less">

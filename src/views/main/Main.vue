@@ -19,16 +19,6 @@
 </template>
 
 <script setup lang="ts" name="main">
-// import { LOGIN_TOKEN } from '@/global/constants';
-// import router from '@/router';
-// import { localCache } from '@/utils/cache';
-// function exitLogin() {
-//   //1. 清除token
-//   localCache.removeCache(LOGIN_TOKEN);
-//   //2. 跳转到登录页面
-//   router.push('/login');
-// }
-
 import MainMenu from '@/components/main-menu/main-menu.vue';
 import MainHeader from '@/components/main-header/main-header.vue';
 import { ref } from 'vue';

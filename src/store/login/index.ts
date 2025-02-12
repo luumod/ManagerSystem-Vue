@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 import { localCache } from '@/utils/cache';
 import router from '@/router';
 import { LOGIN_TOKEN } from '@/global/constants';
-import { mapMenusToRoutes } from '@/utils/mao-menus';
+import { mapMenusToRoutes } from '@/utils/map-menus';
 
 interface ILoginState {
   token: string;
@@ -26,8 +26,8 @@ const useLoginStore = defineStore('login', {
   actions: {
     //acitons内支持异步操作
     /**
-     *
-     * @param userAccount
+     * 处理登录的操作
+     * @param userAccount 用户登录的账号密码 IUserAccount:{user_account,password}
      */
     async accountLoginAction(userAccount: IUserAccount) {
       //1. 账号登录，获取token
@@ -59,6 +59,9 @@ const useLoginStore = defineStore('login', {
       router.push('/main');
     },
 
+    /**
+     * 加载本地的缓存：用在刷新界面时，重新获取本地缓存数据
+     */
     loadLocalCacheAction() {
       const token = localCache.getCache(LOGIN_TOKEN);
       const user_info = localCache.getCache(USER_INFO);
