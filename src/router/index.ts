@@ -19,7 +19,8 @@ const router = createRouter({
     },
     {
       path: '/main',
-      component: () => import('@/views/main/Main.vue')
+      name: 'main',
+      component: () => import('@/views/main/Main.vue'),
     }
   ]
 });
@@ -27,11 +28,10 @@ const router = createRouter({
 //导航守卫
 //to: 跳转到的位置；from：从哪里眺
 //返回值决定导航的路径
-router.beforeEach((to, from) => {
-
+router.beforeEach((to) => {
   //只有登录成功（token），才能进入到主页
   const token = localCache.getCache(LOGIN_TOKEN);
-  if (to.path === '/main' && !token) {
+  if (to.path.startsWith('/main') && !token) {
     return '/login';
   }
 });

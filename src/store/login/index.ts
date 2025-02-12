@@ -4,6 +4,7 @@ import { defineStore } from 'pinia';
 import { localCache } from '@/utils/cache';
 import router from '@/router';
 import { LOGIN_TOKEN } from '@/global/constants';
+import { mapMenusToRoutes } from '@/utils/mao-menus';
 
 interface ILoginState {
   token: string;
@@ -45,6 +46,10 @@ const useLoginStore = defineStore('login', {
       // 个人信息本地缓存
       localCache.setCache(USER_INFO, this.user_info);
       localCache.setCache(USER_MENUS, this.user_menus);
+
+      // 添加动态路由
+      const routes = mapMenusToRoutes(this.user_menus);
+      routes.forEach((route) => router.addRoute('main', route));
 
       //end. 登录成功，页面跳转
       router.push('/main');

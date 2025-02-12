@@ -23,11 +23,13 @@
               <span>{{ item.name }}</span>
             </template>
             <template v-for="subItem in item.children" :key="subItem.id">
-              <el-menu-item :index="subItem.id + ''">{{ subItem.name }}</el-menu-item>
+              <el-menu-item :index="subItem.id + ''" @click="onClickedMenuItem(subItem)">{{
+                subItem.name
+              }}</el-menu-item>
             </template>
           </el-sub-menu>
           <!-- 如果没有children，则当前项就是el-menu-item -->
-          <el-menu-item v-else :index="item.id + ''">
+          <el-menu-item v-else :index="item.id + ''" @click="onClickedMenuItem(item)">
             <el-icon>
               <component :is="item.icon.split('-icon-')[1]" />
             </el-icon>
@@ -42,6 +44,7 @@
 </template>
 
 <script setup lang="ts" name="main-menu">
+import router from '@/router';
 import useLoginStore from '@/store/login';
 
 defineProps({
@@ -61,6 +64,11 @@ console.log(user_menus);
  */
 function hasChildren(item: any): boolean {
   return item.children && item.children.length > 0;
+}
+
+function onClickedMenuItem(item: any) {
+  console.log(item.url);
+  router.push(item.url);
 }
 </script>
 

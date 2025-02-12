@@ -9,7 +9,10 @@
         <el-header height="60px">
           <main-header @fold-change="onFoldChange"></main-header>
         </el-header>
-        <el-main>Main</el-main>
+        <el-main>
+          <!-- 路由视图 -->
+           <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
   </div>
