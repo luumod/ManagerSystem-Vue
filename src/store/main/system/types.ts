@@ -12,3 +12,8 @@ export interface ISystemState {
   user_list: IUserInfo[];
   total_count: number;
 }
+
+export interface IQueryUserListParams {
+  page: number;
+  page_size: number;
+}

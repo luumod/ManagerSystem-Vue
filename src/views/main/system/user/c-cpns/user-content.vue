@@ -18,7 +18,7 @@
         <el-table-column align="center" prop="mobile" label="电话" />
         <el-table-column align="center" prop="email" label="邮箱" />
         <el-table-column align="center" prop="isEnable" label="状态" width="80">
-          <!-- 作用域插槽:实现自定义渲染 -->
+          <!-- 作用域插槽:实现自定义渲染：子组件内部el-table会保存当前行的数据，通过scope.row可以获取当前行的数据 -->
           <template #default="scope">
             <el-button size="small" :type="scope.row.isEnable === 1 ? 'primary' : 'danger'">
               {{ scope.row.isEnable === 1 ? '启用' : '禁用' }}
@@ -31,20 +31,52 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="pagination">分页</div>
+    <div class="pagination">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 30, 40]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total_count"
+        @size-change="onPageSizeChange"
+        @current-change="onCurrentPageChange"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts" name="user-content">
 import useSystemStore from '@/store/main/system/system';
 import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
+
+//数据
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 //1. 发起action，请求user_list数据
 const systemStore = useSystemStore();
-systemStore.getUserListAction();
+fetchUserListData();
 
 //2. 获取响应式的对象
-const { user_list } = storeToRefs(systemStore);
+const { user_list, total_count } = storeToRefs(systemStore);
+
+//3.1 页面的尺寸变化
+function onPageSizeChange() {
+  fetchUserListData();
+}
+
+//3.2 页数变化
+function onCurrentPageChange() {
+  fetchUserListData();
+}
+
+/**
+ * 发送网络请求
+ */
+function fetchUserListData() {
+  systemStore.getUserListAction({ page: currentPage.value, page_size: pageSize.value });
+}
 </script>
 
 <style scoped>
@@ -70,5 +102,11 @@ const { user_list } = storeToRefs(systemStore);
   .el-table_cell {
     padding: 12px 0px;
   }
+}
+
+.pagination {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
