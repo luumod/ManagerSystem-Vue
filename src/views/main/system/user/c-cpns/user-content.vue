@@ -26,8 +26,16 @@
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作">
-          <el-button type="primary" icon="Edit" link>编辑</el-button>
-          <el-button type="danger" icon="Delete" link>删除</el-button>
+          <template #default="scope">
+            <el-button type="primary" icon="Edit" link>编辑</el-button>
+            <el-button
+              type="danger"
+              icon="Delete"
+              link
+              @click="onDeleteUser(scope.row.user_account)"
+              >删除</el-button
+            >
+          </template>
         </el-table-column>
       </el-table>
     </div>
@@ -64,7 +72,7 @@ const pageSize = ref(PAGE_SIZE);
  * @param changePage 页码变化
  * @param changePageSize 页大小变化
  */
-const emit = defineEmits(['changePage', 'changePageSize']);
+const emit = defineEmits(['changePage', 'changePageSize', 'deleteUser-click']);
 
 //1. 发起action，请求user_list数据
 const systemStore = useSystemStore();
@@ -88,14 +96,31 @@ function onCurrentPageChange() {
 }
 
 /**
- * 发送网络请求
+ * 处理用户的删除，为了同时满足用户自定义查询条件，发送信号到外部处理
+ * @param user_account 要删除的用户的账号
+ */
+function onDeleteUser(user_account: any) {
+  emit('deleteUser-click', user_account);
+}
+
+/**
+ * 发送网络请求：查询满足条件的用户列表
  * @param queryInfo 查询条件，默认为空，1页，20条
  */
 function fetchUserListData(queryInfo: T_queryUserData = default_query_condition) {
   systemStore.getUserListAction(queryInfo);
 }
 
-defineExpose({ fetchUserListData });
+/**
+ * 发送网络请求：删除用户
+ * @param user_account 要删除的用户的账号
+ * @param queryInfo 同时满足查询条件
+ */
+function fetchDeleteUser(user_account: string[], queryInfo: T_queryUserData) {
+  systemStore.deleteUsersAction(user_account, queryInfo);
+}
+
+defineExpose({ fetchUserListData, fetchDeleteUser });
 </script>
 
 <style scoped>

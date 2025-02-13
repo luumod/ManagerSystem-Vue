@@ -7,3 +7,12 @@ export function getUserListData(queryInfo: T_queryUserData) {
     data: queryInfo
   });
 }
+
+export function deleteUserData(accounts: string[]) {
+  return hyRequest.post({
+    url: `/user/delete`,
+    data: {
+      lists: accounts
+    }
+  });
+}

@@ -6,6 +6,7 @@
       ref="contentRef"
       @changePage="onChangePage"
       @changePageSize="onChangePageSize"
+      @deleteUser-click="onClickedDelete"
     ></user-content>
   </div>
 </template>
@@ -53,6 +54,14 @@ function onChangePage(page: number) {
 function onChangePageSize(pageSize: number) {
   queryCondition.pageSize = pageSize;
   contentRef.value?.fetchUserListData(queryCondition);
+}
+
+/**
+ * 点击删除按钮会发送请求，删除指定用户（可满足查询条件）
+ * @param user_account 用户账号
+ */
+function onClickedDelete(user_account: any) {
+  contentRef.value?.fetchDeleteUser([user_account], queryCondition);
 }
 </script>
 
