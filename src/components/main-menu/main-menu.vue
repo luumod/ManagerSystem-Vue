@@ -47,7 +47,7 @@
 import router from '@/router';
 import useLoginStore from '@/store/login';
 import { active_menu, mapPathToMenu } from '@/utils/map-menus';
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 //0. 接收父类传参
@@ -73,8 +73,10 @@ function onClickedMenuItem(item: any) {
 
 //3. 监听路径变化，保持菜单的选中状态
 const route = useRoute();
-mapPathToMenu(route.path, user_menus);
-const default_active = ref(active_menu.id + '');
+const default_active = computed(() => {
+  mapPathToMenu(route.path, user_menus);
+  return active_menu.id + '';
+});
 </script>
 
 <style scoped lang="less">

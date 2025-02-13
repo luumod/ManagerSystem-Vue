@@ -53,7 +53,13 @@ export function mapMenusToRoutes(menus: any[]) {
       for (const subMenu of menu.children) {
         const route = localRoutes.find((item) => item.path === subMenu.url);
         if (route) {
+          //1. 顶层菜单项重定向为其第一个子菜单项
+          if (!routes.find((item) => item.path === menu.url)) {
+            routes.push({ path: menu.url, redirect: route.path });
+          }
           routes.push(route);
+
+          //2. 获取第一个菜单项（用于最开始显示的页面）
           if (!first_menu) {
             first_menu = subMenu;
           }
@@ -113,4 +119,40 @@ export function mapPathToMenu(path: string, user_menus: any[]) {
     }
     traverseSubMenus(menu);
   }
+}
+
+interface IBreadcrumb {
+  name: string;
+  path: string;
+}
+
+/**
+ * 匹配路径到面包屑：用于显示当前页面的路径导航
+ * @param path 当前路径
+ * @param user_menus 菜单项
+ * @returns
+ */
+export function mapPathToBreadcrumbs(path: string, user_menus: any[]) {
+  const bread_crumbs: IBreadcrumb[] = [];
+  function traverseSubMenus(menu: any) {
+    if (menu.children) {
+      for (const subMenu of menu.children) {
+        if (subMenu.url === path) {
+          bread_crumbs.push({ name: menu.name, path: menu.url });
+          bread_crumbs.push({ name: subMenu.name, path: subMenu.url });
+        }
+        traverseSubMenus(subMenu);
+      }
+    }
+  }
+
+  for (const menu of user_menus) {
+    if (!menu.children) {
+      if (menu.url === path) {
+        bread_crumbs.push({ name: menu.name, path: menu.url });
+      }
+    }
+    traverseSubMenus(menu);
+  }
+  return bread_crumbs;
 }
