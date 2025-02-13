@@ -29,24 +29,22 @@
         </el-col>
 
         <el-col :span="8">
-          <el-form-item label="创建时间" prop="create_time">
-            <el-date-picker
-              type="daterange"
-              unlink-panels
-              v-model="searchForm.create_time"
-              range-separator="-"
-              start-placeholder="开始时间"
-              end-placeholder="结束时间"
-              size="default"
-            />
+          <el-form-item label="状态" prop="isEnable">
+            <el-select v-model="searchForm.isEnable" placeholder="请选择用户状态">
+              <el-option label="禁用" :value="0" />
+              <el-option label="启用" :value="1" />
+              <el-option label="任意" :value="DEFAULT_ISENABLE" />
+            </el-select>
           </el-form-item>
         </el-col>
 
         <el-col :span="8">
-          <el-form-item label="状态" prop="isEnable">
-            <el-select v-model="searchForm.isEnable" placeholder="请选择用户状态">
-              <el-option label="启用" :value="1" />
-              <el-option label="禁用" :value="0" />
+          <el-form-item label="性别" prop="gender">
+            <el-select v-model="searchForm.gender" placeholder="请选择用户性别">
+              <el-option label="未知" :value="0" />
+              <el-option label="男" :value="1" />
+              <el-option label="女" :value="2" />
+              <el-option label="任意" :value="DEFAULT_GENDER" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -55,13 +53,14 @@
 
     <!-- 重置和搜索按钮-->
     <div class="btns">
-      <el-button :icon="Refresh" @click="onClikedRefresh">重置</el-button>
+      <el-button :icon="Refresh" @click="onClikedReset">重置</el-button>
       <el-button :icon="Search" type="primary" @click="onClickedSearch">搜索</el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts" name="user-search">
+import { DEFAULT_GENDER, DEFAULT_ISENABLE } from '@/store/main/system/types';
 import { Search, Refresh } from '@element-plus/icons-vue';
 import type { ElForm } from 'element-plus';
 import { reactive, ref } from 'vue';
@@ -71,9 +70,16 @@ const searchForm = reactive({
   user_name: '',
   mobile: '',
   email: '',
-  create_time: '',
-  isEnable: 1
+  isEnable: DEFAULT_ISENABLE, // 任意
+  gender: DEFAULT_GENDER // 任意
 });
+
+/**
+ * 自定义事件：
+ * search-click：@search-click="onClickedSearch"
+ * reset-click：@reset-click="onClikedRefresh"
+ */
+const emit = defineEmits(['search-click', 'reset-click']);
 
 //1. 查询信息重置
 const formRef = ref<InstanceType<typeof ElForm>>();
@@ -84,13 +90,14 @@ const formRef = ref<InstanceType<typeof ElForm>>();
  * 2.通过ref获取到el-form实例：formRef
  * 3.调用resetFields方法重置表单
  */
-const onClikedRefresh = () => {
+function onClikedReset() {
   formRef.value?.resetFields();
-};
+  emit('reset-click');
+}
 
-const onClickedSearch = () => {
-  console.log('onClickedSearch');
-};
+function onClickedSearch() {
+  emit('search-click', searchForm);
+}
 </script>
 
 <style scoped lang="less">

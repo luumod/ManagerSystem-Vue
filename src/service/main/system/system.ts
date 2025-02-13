@@ -1,8 +1,9 @@
 import hyRequest from '@/service';
-import type { IQueryUserListParams } from '@/store/main/system/types';
+import type { T_queryUserData } from '@/store/main/system/types';
 
-export function getUserListData(queryInfo: IQueryUserListParams) {
-  return hyRequest.get({
-    url: `/api/user/list?page=${queryInfo.page}&pageSize=${queryInfo.page_size}`
+export function getUserListData(queryInfo: T_queryUserData) {
+  return hyRequest.post({
+    url: `/user/list`,
+    data: queryInfo
   });
 }

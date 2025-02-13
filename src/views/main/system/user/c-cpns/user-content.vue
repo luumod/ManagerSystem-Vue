@@ -47,12 +47,24 @@
 
 <script setup lang="ts" name="user-content">
 import useSystemStore from '@/store/main/system/system';
+import default_query_condition, {
+  PAGE_SIZE,
+  PAGE_START,
+  type T_queryUserData
+} from '@/store/main/system/types';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 //数据
-const currentPage = ref(1);
-const pageSize = ref(10);
+const currentPage = ref(PAGE_START);
+const pageSize = ref(PAGE_SIZE);
+
+/**
+ * 自定义事件
+ * @param changePage 页码变化
+ * @param changePageSize 页大小变化
+ */
+const emit = defineEmits(['changePage', 'changePageSize']);
 
 //1. 发起action，请求user_list数据
 const systemStore = useSystemStore();
@@ -61,22 +73,29 @@ fetchUserListData();
 //2. 获取响应式的对象
 const { user_list, total_count } = storeToRefs(systemStore);
 
-//3.1 页面的尺寸变化
+/**
+ * 页面尺寸变化，为了同时满足用户自定义查询条件，发送信号到外部处理
+ */
 function onPageSizeChange() {
-  fetchUserListData();
+  emit('changePageSize', pageSize.value);
 }
 
-//3.2 页数变化
+/**
+ * 页面页码变化，为了同时满足用户自定义查询条件，发送信号到外部处理
+ */
 function onCurrentPageChange() {
-  fetchUserListData();
+  emit('changePage', currentPage.value);
 }
 
 /**
  * 发送网络请求
+ * @param queryInfo 查询条件，默认为空，1页，20条
  */
-function fetchUserListData() {
-  systemStore.getUserListAction({ page: currentPage.value, page_size: pageSize.value });
+function fetchUserListData(queryInfo: T_queryUserData = default_query_condition) {
+  systemStore.getUserListAction(queryInfo);
 }
+
+defineExpose({ fetchUserListData });
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 import { getUserListData } from '@/service/main/system/system';
 import { defineStore } from 'pinia';
-import type { ISystemState, IQueryUserListParams } from './types';
+import type { ISystemState, T_queryUserData } from './types';
 
 const useStstemStore = defineStore('system', {
   state: (): ISystemState => ({
@@ -8,13 +8,11 @@ const useStstemStore = defineStore('system', {
     total_count: 0
   }),
   actions: {
-    async getUserListAction(queryInfo: IQueryUserListParams) {
+    async getUserListAction(queryInfo: T_queryUserData) {
       const user_list = await getUserListData(queryInfo);
       const { total_records, list } = user_list.data;
       this.user_list = list;
       this.total_count = total_records;
-      console.log(this.user_list);
-      console.log(this.total_count);
     }
   }
 });
