@@ -2,7 +2,7 @@
   <div class="user-content">
     <div class="header">
       <h3 class="title">用户列表</h3>
-      <el-button type="primary">新建用户</el-button>
+      <el-button type="primary" @click="onCreatedNewUser">新建用户</el-button>
     </div>
     <div class="table">
       <el-table :data="user_list" border style="width: 100%">
@@ -67,12 +67,12 @@ import { ref } from 'vue';
 const currentPage = ref(PAGE_START);
 const pageSize = ref(PAGE_SIZE);
 
-/**
- * 自定义事件
- * @param changePage 页码变化
- * @param changePageSize 页大小变化
- */
-const emit = defineEmits(['changePage', 'changePageSize', 'deleteUser-click']);
+const emit = defineEmits([
+  'changePage',
+  'changePageSize',
+  'deleteUser-click',
+  'createdNewUser-click'
+]);
 
 //1. 发起action，请求user_list数据
 const systemStore = useSystemStore();
@@ -101,6 +101,13 @@ function onCurrentPageChange() {
  */
 function onDeleteUser(user_account: any) {
   emit('deleteUser-click', user_account);
+}
+
+/**
+ * 新建用户
+ */
+function onCreatedNewUser() {
+  emit('createdNewUser-click');
 }
 
 /**

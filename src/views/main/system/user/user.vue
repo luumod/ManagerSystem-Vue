@@ -7,13 +7,16 @@
       @changePage="onChangePage"
       @changePageSize="onChangePageSize"
       @deleteUser-click="onClickedDelete"
+      @createdNewUser-click="onClickedCreatedNewUser"
     ></user-content>
+    <user-modal ref="modalRef"> </user-modal>
   </div>
 </template>
 
 <script setup lang="ts" name="user">
 import UserSearch from './c-cpns/user-search.vue';
 import UserContent from './c-cpns/user-content.vue';
+import UserModal from './c-cpns/user-modal.vue';
 import { ref } from 'vue';
 import default_query_condition, { type T_queryUserData } from '@/store/main/system/types';
 
@@ -62,6 +65,12 @@ function onChangePageSize(pageSize: number) {
  */
 function onClickedDelete(user_account: any) {
   contentRef.value?.fetchDeleteUser([user_account], queryCondition);
+}
+
+const modalRef = ref<InstanceType<typeof UserModal>>();
+function onClickedCreatedNewUser() {
+  console.log('点击创建新用户');
+  modalRef.value?.setDlgVisible(true);
 }
 </script>
 
