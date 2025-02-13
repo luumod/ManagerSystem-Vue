@@ -2,7 +2,7 @@
   <div class="main">
     <!-- <button @click="exitLogin">退出登录</button> -->
     <el-container class="main-content">
-      <el-aside :width="isFold ? '60px' : '250px'">
+      <el-aside :width="isFold ? '60px' : '200px'">
         <main-menu :is-fold="isFold"></main-menu>
       </el-aside>
       <el-container>
