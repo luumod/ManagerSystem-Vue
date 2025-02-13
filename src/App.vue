@@ -1,10 +1,15 @@
 <template>
   <div class="App">
-    <router-view></router-view>
+    <el-config-provider :locale="zhCn">
+      <router-view></router-view>
+    </el-config-provider>
   </div>
 </template>
 
-<script setup lang="ts" name="App"></script>
+<script setup lang="ts" name="App">
+import { zhCn } from 'element-plus/es/locales.mjs';
+
+</script>
 
 <style scoped>
 .App {

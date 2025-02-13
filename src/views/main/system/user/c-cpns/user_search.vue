@@ -1,7 +1,7 @@
 <template>
   <div class="user-search">
     <el-form label-width="80px" size="default">
-      <el-row :gutter="100">
+      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="用户名">
             <el-input placeholder="请输入用户名"></el-input>
@@ -17,9 +17,7 @@
           ><el-form-item label="电话号码">
             <el-input placeholder="请输入电话号码"></el-input> </el-form-item
         ></el-col>
-      </el-row>
 
-      <el-row :gutter="100">
         <el-col :span="8">
           <el-form-item label="邮箱">
             <el-input placeholder="请输入邮箱"></el-input>
