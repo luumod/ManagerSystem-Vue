@@ -10,10 +10,21 @@
         <el-table-column align="center" type="index" label="序号" width="60" />
         <el-table-column align="center" prop="user_account" label="账号" />
         <el-table-column align="center" prop="user_name" label="用户名" width="100" />
-        <el-table-column align="center" prop="gender" label="性别" width="60" />
+        <el-table-column align="center" prop="gender" label="性别" width="60">
+          <template #default="scope">
+            {{ scope.row.gender === 1 ? '男' : scope.row.gender === 2 ? '女' : '未知' }}
+          </template>
+        </el-table-column>
         <el-table-column align="center" prop="mobile" label="电话" />
         <el-table-column align="center" prop="email" label="邮箱" />
-        <el-table-column align="center" prop="isEnable" label="状态" width="60" />
+        <el-table-column align="center" prop="isEnable" label="状态" width="80">
+          <!-- 作用域插槽:实现自定义渲染 -->
+          <template #default="scope">
+            <el-button size="small" :type="scope.row.isEnable === 1 ? 'primary' : 'danger'">
+              {{ scope.row.isEnable === 1 ? '启用' : '禁用' }}
+            </el-button>
+          </template>
+        </el-table-column>
         <el-table-column align="center" label="操作">
           <el-button type="primary" icon="Edit" link>编辑</el-button>
           <el-button type="danger" icon="Delete" link>删除</el-button>
