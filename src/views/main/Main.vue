@@ -11,7 +11,7 @@
         </el-header>
         <el-main>
           <!-- 路由视图 -->
-           <router-view></router-view>
+          <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -55,6 +55,7 @@ function onFoldChange(fold: boolean) {
   }
 
   .el-main {
+    --el-main-padding: 10px;
     background-color: #f0f2f5;
   }
 }
