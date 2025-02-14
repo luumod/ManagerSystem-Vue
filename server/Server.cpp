@@ -338,7 +338,7 @@ void Server::route_userLogin()
 		}
 
 		//检查用户是否禁用
-		if (!query.value("isEnable").toBool()) {
+		if (query.value("isEnable").toInt() == 2) {
 			return SResult::success(SResultCode::UserDisabled);
 		}
 
@@ -365,7 +365,7 @@ void Server::route_userLogin()
 		jLoginUser.insert("mobile", query.value("mobile").toString());
 		jLoginUser.insert("email", query.value("email").toString());
 		jLoginUser.insert("avatar_path", query.value("avatar_path").toString());
-		jLoginUser.insert("isEnable", true);
+		jLoginUser.insert("isEnable", 1);
 		jLoginUser.insert("isDeleted", false);
 		jLoginUser.insert("has_image_count", query.value("has_image_count").toInt());
 		jLoginUser.insert("token", QString(jwtObject.jwt()));
@@ -471,13 +471,11 @@ void Server::route_managerUserSystem()
 		if (!email.isEmpty()) {
 			filter += QString(" AND email LIKE '%%1%'").arg(email);
 		}
-		if (gender != 3) {  //0未知 1男 2女 3任意
-			int gender = jdom["gender"].toInt();
+		if (gender) {  // 1男 2女 3保密
 			filter += QString(" AND gender=%1").arg(gender);
 		}
 
-		if (isEnable != 2) { //0禁用 1启用 2任意
-			int isEnable = jdom["isEnable"].toInt();
+		if (isEnable) { // 1启用 2禁用
 			filter += QString(" and isEnable=%1 ").arg(isEnable);
 		}
 		SSqlConnectionWrap wrap;
@@ -635,7 +633,7 @@ void Server::route_managerUserSystem()
 			sql += QString("email='%1',").arg(rObj["email"].toString());
 		}
 		if (rObj.contains("isEnable")) {
-			sql += QString("isEnable=%1,").arg(rObj["isEnable"].toBool());
+			sql += QString("isEnable=%1,").arg(rObj["isEnable"].toInt());
 		}
 
 		sql.chop(1); //去掉最后一个逗号

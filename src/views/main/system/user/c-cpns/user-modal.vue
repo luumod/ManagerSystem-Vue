@@ -20,9 +20,9 @@
           </el-form-item>
           <el-form-item label="性别" prop="gender">
             <el-select v-model="formData.gender" placeholder="请选择性别">
-              <el-option label="保密" :value="0"></el-option>
               <el-option label="男" :value="1"></el-option>
               <el-option label="女" :value="2"></el-option>
+              <el-option label="保密" :value="3"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="电话" prop="mobile">
@@ -55,7 +55,7 @@ const formData: T_createUserParams = reactive({
   password: '',
   mobile: '',
   email: '',
-  gender: 0
+  gender: 1
 });
 const validateAccount = (rule: any, value: string, callback: any) => {
   if (!value) {
@@ -97,7 +97,6 @@ const accountRules: FormRules = {
 const formRef = ref<InstanceType<typeof ElForm>>();
 
 function setDlgVisible(val: boolean) {
-  console.log('val: ', val);
   dialogVisible.value = val;
 }
 

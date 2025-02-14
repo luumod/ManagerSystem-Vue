@@ -1,5 +1,5 @@
 /**
- * 创建用户时，所需要所需的参数
+ * 创建用户时，所需要的参数
  */
 export interface T_createUserParams {
   user_account: string;
@@ -8,6 +8,18 @@ export interface T_createUserParams {
   mobile: string;
   email: string;
   password: string;
+}
+
+/**
+ * 修改用户时，所需要的参数
+ */
+export interface T_updateUserInfo {
+  user_account: string;
+  user_name: string;
+  mobile: string;
+  email: string;
+  isEnable: number;
+  gender: number;
 }
 
 /**
@@ -40,8 +52,6 @@ export interface T_userSystemState {
 export const PAGE_START = 1;
 //每页显示20条数据
 export const PAGE_SIZE = 20;
-export const DEFAULT_GENDER = 3;
-export const DEFAULT_ISENABLE = 2;
 
 /**
  * 查询用户时可以传入搜索的条件
@@ -67,8 +77,8 @@ const default_query_condition: T_queryUserData = {
   user_name: '',
   mobile: '',
   email: '',
-  isEnable: DEFAULT_ISENABLE,
-  gender: DEFAULT_GENDER
+  isEnable: 0,
+  gender: 0
 };
 
 export default default_query_condition;

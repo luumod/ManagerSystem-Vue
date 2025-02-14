@@ -21,13 +21,15 @@
           <!-- 作用域插槽:实现自定义渲染：子组件内部el-table会保存当前行的数据，通过scope.row可以获取当前行的数据 -->
           <template #default="scope">
             <el-button size="small" :type="scope.row.isEnable === 1 ? 'primary' : 'danger'">
-              {{ scope.row.isEnable === 1 ? '启用' : '禁用' }}
+              {{ scope.row.isEnable === 1 ? '启用' : scope.row.isEnable === 2 ? '禁用' : '错误' }}
             </el-button>
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作">
           <template #default="scope">
-            <el-button type="primary" icon="Edit" link>编辑</el-button>
+            <el-button type="primary" icon="Edit" link @click="onEditUser(scope.row)"
+              >编辑</el-button
+            >
             <el-button type="danger" icon="Delete" link @click="onDeleteUser(scope.row.id)"
               >删除</el-button
             >
@@ -67,7 +69,8 @@ const emit = defineEmits([
   'changePage',
   'changePageSize',
   'deleteUser-click',
-  'createdNewUser-click'
+  'createdNewUser-click',
+  'editUser-click'
 ]);
 
 //1. 发起action，请求user_list数据
@@ -97,6 +100,14 @@ function onCurrentPageChange() {
  */
 function onDeleteUser(id: any) {
   emit('deleteUser-click', id);
+}
+
+/**
+ * 编辑用户
+ * @param item_data 要编辑的用户的数据
+ */
+function onEditUser(item_data: any) {
+  emit('editUser-click', item_data);
 }
 
 /**

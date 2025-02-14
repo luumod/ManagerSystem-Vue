@@ -2,10 +2,16 @@ import {
   checkUserAccount,
   createNewUser,
   deleteUserData,
-  getUserListData
+  getUserListData,
+  updateUserData
 } from '@/service/main/system/system';
 import { defineStore } from 'pinia';
-import type { T_userSystemState, T_queryUserData, T_createUserParams } from './types';
+import type {
+  T_userSystemState,
+  T_queryUserData,
+  T_createUserParams,
+  T_updateUserInfo
+} from './types';
 import default_query_condition from './types';
 
 const useSystemStore = defineStore('system', {
@@ -35,6 +41,11 @@ const useSystemStore = defineStore('system', {
         .catch((error) => {
           throw error; //用户已经存在
         });
+    },
+    async updateUserAction(id: number, update_user_params: T_updateUserInfo) {
+      await updateUserData(id, update_user_params).then(() => {
+        this.getUserListAction();
+      });
     },
     async checkUserAccountAction(account: string) {
       await checkUserAccount(account)

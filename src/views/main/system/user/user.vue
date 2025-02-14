@@ -8,8 +8,10 @@
       @changePageSize="onChangePageSize"
       @deleteUser-click="onClickedDelete"
       @createdNewUser-click="onClickedCreatedNewUser"
+      @editUser-click="onClickedEditUser"
     ></user-content>
     <user-modal ref="modalRef"> </user-modal>
+    <user-modal-edit ref="modalEditRef"></user-modal-edit>
   </div>
 </template>
 
@@ -17,6 +19,7 @@
 import UserSearch from './c-cpns/user-search.vue';
 import UserContent from './c-cpns/user-content.vue';
 import UserModal from './c-cpns/user-modal.vue';
+import UserModalEdit from './c-cpns/user-modal-edit.vue';
 import { ref } from 'vue';
 import default_query_condition, { type T_queryUserData } from '@/store/main/system/types';
 
@@ -65,6 +68,15 @@ function onChangePageSize(pageSize: number) {
  */
 function onClickedDelete(id: number) {
   contentRef.value?.fetchDeleteUser(id, queryCondition);
+}
+
+const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
+/**
+ * 点击编辑按钮：显示编辑框，并将用户信息填充到编辑框中
+ * @param item_data 用户信息
+ */
+function onClickedEditUser(item_data: any) {
+  modalEditRef.value?.showUpdateUserDlg(item_data);
 }
 
 const modalRef = ref<InstanceType<typeof UserModal>>();

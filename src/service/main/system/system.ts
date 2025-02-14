@@ -1,5 +1,5 @@
 import hyRequest from '@/service';
-import type { T_createUserParams, T_queryUserData } from '@/store/main/system/types';
+import type { T_createUserParams, T_queryUserData, T_updateUserInfo } from '@/store/main/system/types';
 
 /**
  * 根据自定义查询条件，查询所有用户列表
@@ -42,5 +42,12 @@ export function createNewUser(new_user_params: T_createUserParams) {
 export function checkUserAccount(account: string) {
   return hyRequest.get({
     url: `/check/account/${account}`
+  });
+}
+
+export function updateUserData(id: number, user_params: T_updateUserInfo) {
+  return hyRequest.patch({
+    url: `/user/${id}`,
+    data: user_params
   });
 }
