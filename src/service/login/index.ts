@@ -8,7 +8,7 @@ import type { IUserAccount } from '@/types';
  */
 export function accountLoginRequest(userAccount: IUserAccount) {
   return hyRequest.post({
-    url: `/api/login`,
+    url: `/login`,
     data: userAccount //params
   });
 }
@@ -20,10 +20,7 @@ export function accountLoginRequest(userAccount: IUserAccount) {
  */
 export function getUserInfoById(id: number) {
   return hyRequest.get({
-    url: `/api/user/get_one_image?image_id=${id}`
-    // headers: { //添加请求时拦截即可
-    //   Authorization: localCache.getCache(LOGIN_TOKEN)
-    // }
+    url: `/user/${id}`
   });
 }
 

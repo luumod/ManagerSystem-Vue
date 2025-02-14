@@ -37,15 +37,14 @@ const useLoginStore = defineStore('login', {
 
       //2. token本地缓存
       localCache.setCache(LOGIN_TOKEN, this.token);
-
+      debugger;
       //3. 获取登录用户的详细信息
       const userInfo = await getUserInfoById(id);
-      this.user_info = userInfo.data.images[0];
+      this.user_info = userInfo.data;
 
       //4. 根据角色请求用户的权限
-      const userMenusRes = await getUserMenusByRoleId(this.user_info.image_id);
+      const userMenusRes = await getUserMenusByRoleId(this.user_info.id);
       this.user_menus = userMenusRes.data;
-      console.log(userMenusRes);
 
       // 个人信息本地缓存
       localCache.setCache(USER_INFO, this.user_info);

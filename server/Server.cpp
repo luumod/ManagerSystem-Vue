@@ -318,7 +318,7 @@ Server::Server()
 void Server::route_userLogin()
 {
 	//用户登录
-	m_server.route("/api/login", [](const QHttpServerRequest& request) {
+	m_server.route("/login", [](const QHttpServerRequest& request) {
 		CheckJsonParse(request);
 
 		SSqlConnectionWrap wrap;
@@ -375,7 +375,7 @@ void Server::route_userLogin()
 		});
 
 	//用户注册
-	m_server.route("/api/register", [](const QHttpServerRequest& request) {
+	m_server.route("/register", [](const QHttpServerRequest& request) {
 		CheckJsonParse(request);
 
 		SSqlConnectionWrap wrap;

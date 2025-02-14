@@ -61,15 +61,14 @@ function onChangePageSize(pageSize: number) {
 
 /**
  * 点击删除按钮会发送请求，删除指定用户（可满足查询条件）
- * @param user_account 用户账号
+ * @param id 用户id
  */
-function onClickedDelete(user_account: any) {
-  contentRef.value?.fetchDeleteUser([user_account], queryCondition);
+function onClickedDelete(id: number) {
+  contentRef.value?.fetchDeleteUser(id, queryCondition);
 }
 
 const modalRef = ref<InstanceType<typeof UserModal>>();
 function onClickedCreatedNewUser() {
-  console.log('点击创建新用户');
   modalRef.value?.setDlgVisible(true);
 }
 </script>

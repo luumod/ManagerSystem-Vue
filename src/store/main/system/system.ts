@@ -14,9 +14,9 @@ const useStstemStore = defineStore('system', {
       this.user_list = list;
       this.total_count = total_records;
     },
-    async deleteUsersAction(accounts: string[], queryInfo: T_queryUserData) {
+    async deleteUsersAction(id: number, queryInfo: T_queryUserData) {
       //1. 删除数据
-      await deleteUserData(accounts);
+      await deleteUserData(id);
 
       //2. 更新列表
       this.getUserListAction(queryInfo);

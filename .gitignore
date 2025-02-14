@@ -36,3 +36,4 @@ coverage
 /server/build
 /server/bin
 /bin
+/test

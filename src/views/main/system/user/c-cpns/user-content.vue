@@ -28,11 +28,7 @@
         <el-table-column align="center" label="操作">
           <template #default="scope">
             <el-button type="primary" icon="Edit" link>编辑</el-button>
-            <el-button
-              type="danger"
-              icon="Delete"
-              link
-              @click="onDeleteUser(scope.row.user_account)"
+            <el-button type="danger" icon="Delete" link @click="onDeleteUser(scope.row.id)"
               >删除</el-button
             >
           </template>
@@ -97,10 +93,10 @@ function onCurrentPageChange() {
 
 /**
  * 处理用户的删除，为了同时满足用户自定义查询条件，发送信号到外部处理
- * @param user_account 要删除的用户的账号
+ * @param id 要删除的用户的id
  */
-function onDeleteUser(user_account: any) {
-  emit('deleteUser-click', user_account);
+function onDeleteUser(id: any) {
+  emit('deleteUser-click', id);
 }
 
 /**
@@ -120,11 +116,11 @@ function fetchUserListData(queryInfo: T_queryUserData = default_query_condition)
 
 /**
  * 发送网络请求：删除用户
- * @param user_account 要删除的用户的账号
+ * @param id 要删除的用户的id
  * @param queryInfo 同时满足查询条件
  */
-function fetchDeleteUser(user_account: string[], queryInfo: T_queryUserData) {
-  systemStore.deleteUsersAction(user_account, queryInfo);
+function fetchDeleteUser(id: number, queryInfo: T_queryUserData) {
+  systemStore.deleteUsersAction(id, queryInfo);
 }
 
 defineExpose({ fetchUserListData, fetchDeleteUser });
