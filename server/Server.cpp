@@ -454,8 +454,8 @@ void Server::route_managerUserSystem()
 		auto user_name = jdom["user_name"].toString();
 		auto mobile = jdom["mobile"].toString();
 		auto email = jdom["email"].toString();
-		auto gender = jdom["gender"].toInt();
-		auto isEnable = jdom["isEnable"].toInt();
+		auto gender = jdom["gender"].toString().toInt();
+		auto isEnable = jdom["isEnable"].toString().toInt();
 
 		QString filter = "WHERE isDeleted=false ";
 		//模糊搜索
@@ -471,13 +471,11 @@ void Server::route_managerUserSystem()
 		if (!email.isEmpty()) {
 			filter += QString(" AND email LIKE '%%1%'").arg(email);
 		}
-		if (gender != 3) {  //0未知 1男 2女 3任意
-			int gender = jdom["gender"].toInt();
+		if (gender) {  // 1男 2女 3未知
 			filter += QString(" AND gender=%1").arg(gender);
 		}
 
-		if (isEnable != 2) { //0禁用 1启用 2任意
-			int isEnable = jdom["isEnable"].toInt();
+		if (isEnable) { // 1启用 2禁用
 			filter += QString(" and isEnable=%1 ").arg(isEnable);
 		}
 		SSqlConnectionWrap wrap;
