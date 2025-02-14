@@ -1,15 +1,38 @@
-export interface IUserInfo {
+/**
+ * 创建用户时，所需要所需的参数
+ */
+export interface T_createUserParams {
+  user_account: string;
+  user_name: string;
+  gender: number;
+  mobile: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * 一个用户的全部信息
+ */
+export interface T_userInfo {
+  avatar_path: string;
+  create_time: string;
   email: string;
   gender: number;
+  has_image_count: number;
   id: number;
+  isDeleted: number;
   isEnable: number;
   mobile: string;
+  password: string;
   user_account: string;
   user_name: string;
 }
 
-export interface ISystemState {
-  user_list: IUserInfo[];
+/**
+ * store中存储的用户列表的信息
+ */
+export interface T_userSystemState {
+  user_list: T_userInfo[];
   total_count: number;
 }
 

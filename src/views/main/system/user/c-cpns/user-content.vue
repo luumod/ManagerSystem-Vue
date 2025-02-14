@@ -8,15 +8,15 @@
       <el-table :data="user_list" border style="width: 100%">
         <el-table-column align="center" type="selection" width="50" />
         <el-table-column align="center" type="index" label="序号" width="60" />
-        <el-table-column align="center" prop="user_account" label="账号" />
-        <el-table-column align="center" prop="user_name" label="用户名" width="100" />
+        <el-table-column align="center" prop="user_account" label="账号" width="200" />
+        <el-table-column align="center" prop="user_name" label="用户名" />
         <el-table-column align="center" prop="gender" label="性别" width="60">
           <template #default="scope">
             {{ scope.row.gender === 1 ? '男' : scope.row.gender === 2 ? '女' : '未知' }}
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="mobile" label="电话" />
-        <el-table-column align="center" prop="email" label="邮箱" />
+        <el-table-column align="center" prop="mobile" label="电话" width="130" />
+        <el-table-column align="center" prop="email" label="邮箱" width="200" />
         <el-table-column align="center" prop="isEnable" label="状态" width="80">
           <!-- 作用域插槽:实现自定义渲染：子组件内部el-table会保存当前行的数据，通过scope.row可以获取当前行的数据 -->
           <template #default="scope">

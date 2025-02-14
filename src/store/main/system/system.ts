@@ -1,14 +1,15 @@
-import { deleteUserData, getUserListData } from '@/service/main/system/system';
+import { createNewUser, deleteUserData, getUserListData } from '@/service/main/system/system';
 import { defineStore } from 'pinia';
-import type { ISystemState, T_queryUserData } from './types';
+import type { T_userSystemState, T_queryUserData, T_createUserParams } from './types';
+import default_query_condition from './types';
 
-const useStstemStore = defineStore('system', {
-  state: (): ISystemState => ({
+const useSystemStore = defineStore('system', {
+  state: (): T_userSystemState => ({
     user_list: [],
     total_count: 0
   }),
   actions: {
-    async getUserListAction(queryInfo: T_queryUserData) {
+    async getUserListAction(queryInfo: T_queryUserData = default_query_condition) {
       const user_list = await getUserListData(queryInfo);
       const { total_records, list } = user_list.data;
       this.user_list = list;
@@ -20,8 +21,18 @@ const useStstemStore = defineStore('system', {
 
       //2. 更新列表
       this.getUserListAction(queryInfo);
+    },
+    async createNewUserAction(new_user_params: T_createUserParams) {
+      try {
+        await createNewUser(new_user_params);
+        await this.getUserListAction();
+      } catch (error: any) {
+        if (error.code === 3002) {
+          throw error;
+        }
+      }
     }
   }
 });
 
-export default useStstemStore;
+export default useSystemStore;

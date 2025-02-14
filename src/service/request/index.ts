@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 import type { HYRequestConfig } from './type';
+import C_Error from '@/types/error.types';
 
 // 拦截器: 蒙版Loading/token/修改配置
 
@@ -27,16 +28,30 @@ class HYRequest {
         // loading/token
         return config;
       },
-      (err) => {
-        return err;
-      }
+      (error) => Promise.reject(error)
     );
+
     this.instance.interceptors.response.use(
-      (res) => {
-        return res.data;
+      (response) => {
+        const { code, codestr, message } = response.data;
+
+        //在此添加错误拦截
+        if (code !== undefined && code !== 0) {
+          const error = new C_Error(message, code, codestr);
+          console.log(error);
+          return Promise.reject(error);
+        }
+        return response.data;
       },
-      (err) => {
-        return err;
+      (error) => {
+        // 处理 HTTP 错误状态码
+        const errorMessage = error.response?.data?.message || error.message || '网络连接异常';
+        const errorCode = error.response?.status || error.code || 'UNKNOWN_ERROR';
+
+        const customError = new C_Error(errorMessage, errorCode, 'HTTP_ERROR');
+        customError.code = errorCode;
+
+        return Promise.reject(customError);
       }
     );
 
@@ -71,7 +86,7 @@ class HYRequest {
           resolve(res);
         })
         .catch((err) => {
-          reject(err);
+          reject(err); // Reject 错误，供调用者进一步处理
         });
     });
   }
