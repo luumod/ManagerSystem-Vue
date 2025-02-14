@@ -20,7 +20,11 @@
         <el-table-column align="center" prop="isEnable" label="状态" width="80">
           <!-- 作用域插槽:实现自定义渲染：子组件内部el-table会保存当前行的数据，通过scope.row可以获取当前行的数据 -->
           <template #default="scope">
-            <el-button size="small" :type="scope.row.isEnable === 1 ? 'primary' : 'danger'">
+            <el-button
+              size="small"
+              :type="scope.row.isEnable === 1 ? 'primary' : 'danger'"
+              @click="onSetEnableUser(scope.row)"
+            >
               {{ scope.row.isEnable === 1 ? '启用' : scope.row.isEnable === 2 ? '禁用' : '错误' }}
             </el-button>
           </template>
@@ -70,7 +74,8 @@ const emit = defineEmits([
   'changePageSize',
   'deleteUser-click',
   'createdNewUser-click',
-  'editUser-click'
+  'editUser-click',
+  'changeEnableUser-click'
 ]);
 
 //1. 发起action，请求user_list数据
@@ -111,6 +116,15 @@ function onEditUser(item_data: any) {
 }
 
 /**
+ * 处理用户的启用/禁用
+ * @param item_data 要设置状态的用户的数据
+ */
+function onSetEnableUser(item_data: any) {
+  item_data.isEnable = item_data.isEnable === 1 ? 2 : 1;
+  emit('changeEnableUser-click', item_data);
+}
+
+/**
  * 新建用户
  */
 function onCreatedNewUser() {
@@ -134,7 +148,16 @@ function fetchDeleteUser(id: number, queryInfo: T_queryUserData) {
   systemStore.deleteUsersAction(id, queryInfo);
 }
 
-defineExpose({ fetchUserListData, fetchDeleteUser });
+/**
+ * 发送网络请求：更新用户
+ * @param item_data 要更新的用户的数据
+ * @param queryInfo 同时满足查询条件
+ */
+function fetchUpdateUser(item_data: any, queryInfo: T_queryUserData) {
+  systemStore.updateUserAction(item_data.id, { isEnable: item_data.isEnable }, queryInfo);
+}
+
+defineExpose({ fetchUserListData, fetchDeleteUser, fetchUpdateUser });
 </script>
 
 <style scoped>

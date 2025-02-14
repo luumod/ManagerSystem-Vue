@@ -42,9 +42,13 @@ const useSystemStore = defineStore('system', {
           throw error; //用户已经存在
         });
     },
-    async updateUserAction(id: number, update_user_params: T_updateUserInfo) {
+    async updateUserAction(
+      id: number,
+      update_user_params: T_updateUserInfo | any,
+      queryInfo: T_queryUserData = default_query_condition
+    ) {
       await updateUserData(id, update_user_params).then(() => {
-        this.getUserListAction();
+        this.getUserListAction(queryInfo);
       });
     },
     async checkUserAccountAction(account: string) {

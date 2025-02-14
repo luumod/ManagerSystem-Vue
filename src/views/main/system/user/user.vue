@@ -9,6 +9,7 @@
       @deleteUser-click="onClickedDelete"
       @createdNewUser-click="onClickedCreatedNewUser"
       @editUser-click="onClickedEditUser"
+      @changeEnableUser-click="onClickedChanegeEnableUser"
     ></user-content>
     <user-modal ref="modalRef"> </user-modal>
     <user-modal-edit ref="modalEditRef"></user-modal-edit>
@@ -25,6 +26,8 @@ import default_query_condition, { type T_queryUserData } from '@/store/main/syst
 
 // 获content实例对象
 const contentRef = ref<InstanceType<typeof UserContent>>();
+const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
+const modalRef = ref<InstanceType<typeof UserModal>>();
 let queryCondition = default_query_condition;
 
 /**
@@ -70,7 +73,14 @@ function onClickedDelete(id: number) {
   contentRef.value?.fetchDeleteUser(id, queryCondition);
 }
 
-const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
+/**
+ * 点击状态图标，会改变用户的状态（启用/禁用）（可满足查询条件）
+ * @param item_data 用户的全部信息
+ */
+function onClickedChanegeEnableUser(item_data: any) {
+  contentRef.value?.fetchUpdateUser(item_data, queryCondition);
+}
+
 /**
  * 点击编辑按钮：显示编辑框，并将用户信息填充到编辑框中
  * @param item_data 用户信息
@@ -79,7 +89,9 @@ function onClickedEditUser(item_data: any) {
   modalEditRef.value?.showUpdateUserDlg(item_data);
 }
 
-const modalRef = ref<InstanceType<typeof UserModal>>();
+/**
+ * 点击新增按钮：显示新增用户的弹窗
+ */
 function onClickedCreatedNewUser() {
   modalRef.value?.setDlgVisible(true);
 }
