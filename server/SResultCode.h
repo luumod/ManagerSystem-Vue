@@ -63,6 +63,7 @@ public:
 	CODE(ImageCommentError, 3013, "评论失败");
 	CODE(ImageNotFound, 3014, "图片不存在");
 	CODE(ImageAlreadyDeleted, 3015, "图片已被删除");
+	CODE(AccountAleadyExists, 3016, "账号重复");
 #undef CODE
 
 	friend class SResult;

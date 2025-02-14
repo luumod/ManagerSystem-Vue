@@ -1,4 +1,9 @@
-import { createNewUser, deleteUserData, getUserListData } from '@/service/main/system/system';
+import {
+  checkUserAccount,
+  createNewUser,
+  deleteUserData,
+  getUserListData
+} from '@/service/main/system/system';
 import { defineStore } from 'pinia';
 import type { T_userSystemState, T_queryUserData, T_createUserParams } from './types';
 import default_query_condition from './types';
@@ -23,14 +28,22 @@ const useSystemStore = defineStore('system', {
       this.getUserListAction(queryInfo);
     },
     async createNewUserAction(new_user_params: T_createUserParams) {
-      try {
-        await createNewUser(new_user_params);
-        await this.getUserListAction();
-      } catch (error: any) {
-        if (error.code === 3002) {
-          throw error;
-        }
-      }
+      await createNewUser(new_user_params)
+        .then(() => {
+          this.getUserListAction();
+        })
+        .catch((error) => {
+          throw error; //用户已经存在
+        });
+    },
+    async checkUserAccountAction(account: string) {
+      await checkUserAccount(account)
+        .then(() => {
+          return true;
+        })
+        .catch((error) => {
+          throw error; //账号重复
+        });
     }
   }
 });

@@ -38,7 +38,6 @@ class HYRequest {
         //在此添加错误拦截
         if (code !== undefined && code !== 0) {
           const error = new C_Error(message, code, codestr);
-          console.log(error);
           return Promise.reject(error);
         }
         return response.data;

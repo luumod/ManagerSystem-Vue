@@ -2,7 +2,13 @@
   <div class="user-modal">
     <el-dialog v-model="dialogVisible" title="新建用户" width="30%" center>
       <div class="form">
-        <el-form :model="formData" ref="formRef" label-width="100px">
+        <el-form
+          :model="formData"
+          ref="formRef"
+          :rules="accountRules"
+          status-icon
+          label-width="100px"
+        >
           <el-form-item label="账号" prop="user_account">
             <el-input v-model="formData.user_account" placeholder="请输入账号"></el-input>
           </el-form-item>
@@ -38,7 +44,7 @@
 <script setup lang="ts" name="user-modal">
 import useSystemStore from '@/store/main/system/system';
 import type { T_createUserParams } from '@/store/main/system/types';
-import { ElForm, ElMessage } from 'element-plus';
+import { ElForm, ElMessage, type FormRules } from 'element-plus';
 import { reactive, ref } from 'vue';
 
 const dialogVisible = ref(false);
@@ -51,6 +57,43 @@ const formData: T_createUserParams = reactive({
   email: '',
   gender: 0
 });
+const validateAccount = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    return callback(new Error('请输入账号！'));
+  }
+
+  if (!/^[a-zA-Z0-9]{6,20}$/.test(value)) {
+    return callback(new Error('账号长度必须为6-20位字母或数字！'));
+  }
+
+  systemStore
+    .checkUserAccountAction(value)
+    .then(() => {
+      callback();
+    })
+    .catch((error: any) => {
+      callback(new Error(error.message));
+    });
+};
+
+//校验规则
+const accountRules: FormRules = {
+  user_account: [{ validator: validateAccount, trigger: 'blur' }],
+  user_name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9]{6,20}$/, message: '密码长度必须在6-20位之间', trigger: 'blur' }
+  ],
+  mobile: [
+    { required: true, message: '请输入手机号码', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
+  ]
+};
+
 const formRef = ref<InstanceType<typeof ElForm>>();
 
 function setDlgVisible(val: boolean) {
@@ -61,23 +104,24 @@ function setDlgVisible(val: boolean) {
 /**
  * 点击了【新建】，发送请求，新建一个用户
  */
-async function handleSubmit() {
-  try {
-    //1. 发送请求
-    await systemStore.createNewUserAction(formData);
-    debugger;
-    //2. 显示成功提示
-    ElMessage.success('新建用户成功！');
+function handleSubmit() {
+  //1. 发送请求
+  systemStore
+    .createNewUserAction(formData)
+    .then(() => {
+      //2. 显示成功提示
+      ElMessage.success('新建用户成功！');
 
-    //3. 关闭弹窗
-    setDlgVisible(false);
+      //3. 关闭弹窗
+      setDlgVisible(false);
 
-    //4. 刷新列表
-    formRef.value?.resetFields();
-  } catch (error: any) {
-    //1. 显示失败提示
-    ElMessage.error(error.message);
-  }
+      //4. 刷新列表
+      formRef.value?.resetFields();
+    })
+    .catch((error: any) => {
+      //1. 显示失败提示
+      ElMessage.error(error.message);
+    });
 }
 
 defineExpose({ setDlgVisible });

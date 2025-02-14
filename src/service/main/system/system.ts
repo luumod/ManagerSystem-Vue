@@ -38,3 +38,9 @@ export function createNewUser(new_user_params: T_createUserParams) {
     data: new_user_params
   });
 }
+
+export function checkUserAccount(account: string) {
+  return hyRequest.get({
+    url: `/check/account/${account}`
+  });
+}

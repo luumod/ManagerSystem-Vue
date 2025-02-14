@@ -663,6 +663,37 @@ void Server::route_managerUserSystem()
 
 void Server::route_advancedQuery() {
 
+	//检查某个用户账号是否与数据库中重复
+	m_server.route("/check/account/<arg>", QHttpServerRequest::Method::Get,
+		[](const QString& user_account, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+			// 校验Token
+			std::optional<QByteArray> token = CheckToken(request);
+			if (token.has_value()) {
+				responder.write(token.value(), "application/json");
+				return;
+			}
+
+			SSqlConnectionWrap wrap;
+			QSqlQuery query(wrap.openConnection());
+			query.prepare(QString("SELECT * FROM user_info WHERE user_account='%1'").arg(user_account));
+			query.exec();
+#if _DEBUG
+			qDebug() << "检查用户账号是否重复";
+			qDebug() << query.lastQuery() << '\n';
+#endif
+			CheckArgsSqlQuery(query, responder);
+
+			// 查询到数据
+			if (query.next()) {
+				responder.write(SResult::error(SResultCode::AccountAleadyExists), "application/json");
+				return;
+			}
+			responder.write(SResult::success(), "application/json");
+			return;
+
+		});
+
+	
 	//获取目录树：GET
 	m_server.route("/role/<arg>/menu", QHttpServerRequest::Method::Get,
 		[](const QString& user_id, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
