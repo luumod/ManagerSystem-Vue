@@ -15,14 +15,14 @@
           <el-form-item label="用户名" prop="user_name">
             <el-input v-model="formData.user_name" placeholder="请输入用户名"></el-input>
           </el-form-item>
-          <el-form-item v-if="isNew" label="密码" prop="password">
+          <el-form-item label="密码" prop="password">
             <el-input v-model="formData.password" placeholder="请输入密码" show-password></el-input>
           </el-form-item>
           <el-form-item label="性别" prop="gender">
             <el-select v-model="formData.gender" placeholder="请选择性别">
-              <el-option label="男" value="1"></el-option>
-              <el-option label="女" value="2"></el-option>
-              <el-option label="保密" value="3"></el-option>
+              <el-option label="保密" :value="0"></el-option>
+              <el-option label="男" :value="1"></el-option>
+              <el-option label="女" :value="2"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="电话" prop="mobile">
@@ -55,7 +55,7 @@ const formData: T_createUserParams = reactive({
   password: '',
   mobile: '',
   email: '',
-  gender: ''
+  gender: 0
 });
 const validateAccount = (rule: any, value: string, callback: any) => {
   if (!value) {
@@ -95,31 +95,10 @@ const accountRules: FormRules = {
 };
 
 const formRef = ref<InstanceType<typeof ElForm>>();
-const isNew = ref(true);
 
-/**
- * 显示新建用户弹窗
- */
-function showCreatedDlg() {
-  //1. 重置表单数据
-  formRef.value?.resetFields();
-  //2. 显示密码输入框
-  isNew.value = true;
-  //3. 显示弹窗
-  dialogVisible.value = true;
-}
-
-/**
- * 显示编辑用户弹窗
- * @param item_data 用户数据
- */
-function showEditUserDlg(item_data: T_createUserParams) {
-  //1. 初始化表单数据
-  Object.assign(formData, item_data);
-  //2. 隐藏密码输入框
-  isNew.value = false;
-  //3. 显示弹窗
-  dialogVisible.value = true;
+function setDlgVisible(val: boolean) {
+  console.log('val: ', val);
+  dialogVisible.value = val;
 }
 
 /**
@@ -134,7 +113,7 @@ function handleSubmit() {
       ElMessage.success('新建用户成功！');
 
       //3. 关闭弹窗
-      dialogVisible.value = false;
+      setDlgVisible(false);
 
       //4. 刷新列表
       formRef.value?.resetFields();
@@ -145,7 +124,7 @@ function handleSubmit() {
     });
 }
 
-defineExpose({ showCreatedDlg, showEditUserDlg });
+defineExpose({ setDlgVisible });
 </script>
 
 <style scoped>

@@ -12,7 +12,7 @@
         <el-table-column align="center" prop="user_name" label="用户名" />
         <el-table-column align="center" prop="gender" label="性别" width="60">
           <template #default="scope">
-            {{ scope.row.gender === 1 ? '男' : scope.row.gender === 2 ? '女' : '保密' }}
+            {{ scope.row.gender === 1 ? '男' : scope.row.gender === 2 ? '女' : '未知' }}
           </template>
         </el-table-column>
         <el-table-column align="center" prop="mobile" label="电话" width="130" />
@@ -27,9 +27,7 @@
         </el-table-column>
         <el-table-column align="center" label="操作">
           <template #default="scope">
-            <el-button type="primary" icon="Edit" link @click="onEditUser(scope.row)"
-              >编辑</el-button
-            >
+            <el-button type="primary" icon="Edit" link>编辑</el-button>
             <el-button type="danger" icon="Delete" link @click="onDeleteUser(scope.row.id)"
               >删除</el-button
             >
@@ -69,8 +67,7 @@ const emit = defineEmits([
   'changePage',
   'changePageSize',
   'deleteUser-click',
-  'createdNewUser-click',
-  'editUser-click'
+  'createdNewUser-click'
 ]);
 
 //1. 发起action，请求user_list数据
@@ -100,10 +97,6 @@ function onCurrentPageChange() {
  */
 function onDeleteUser(id: any) {
   emit('deleteUser-click', id);
-}
-
-function onEditUser(item_data: any) {
-  emit('editUser-click', item_data);
 }
 
 /**

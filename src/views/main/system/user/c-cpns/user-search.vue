@@ -31,9 +31,9 @@
         <el-col :span="8">
           <el-form-item label="状态" prop="isEnable">
             <el-select v-model="searchForm.isEnable" placeholder="请选择用户状态">
-              <el-option label="任意" value="" />
-              <el-option label="启用" value="1" />
-              <el-option label="禁用" value="2" />
+              <el-option label="禁用" :value="0" />
+              <el-option label="启用" :value="1" />
+              <el-option label="任意" :value="DEFAULT_ISENABLE" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -41,10 +41,10 @@
         <el-col :span="8">
           <el-form-item label="性别" prop="gender">
             <el-select v-model="searchForm.gender" placeholder="请选择用户性别">
-              <el-option label="任意" value="" />
-              <el-option label="男" value="1" />
-              <el-option label="女" value="2" />
-              <el-option label="保密" value="3" />
+              <el-option label="未知" :value="0" />
+              <el-option label="男" :value="1" />
+              <el-option label="女" :value="2" />
+              <el-option label="任意" :value="DEFAULT_GENDER" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -60,6 +60,7 @@
 </template>
 
 <script setup lang="ts" name="user-search">
+import { DEFAULT_GENDER, DEFAULT_ISENABLE } from '@/store/main/system/types';
 import { Search, Refresh } from '@element-plus/icons-vue';
 import type { ElForm } from 'element-plus';
 import { reactive, ref } from 'vue';
@@ -69,8 +70,8 @@ const searchForm = reactive({
   user_name: '',
   mobile: '',
   email: '',
-  isEnable: '',
-  gender: ''
+  isEnable: DEFAULT_ISENABLE, // 任意
+  gender: DEFAULT_GENDER // 任意
 });
 
 /**

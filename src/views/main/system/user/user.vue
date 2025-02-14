@@ -8,7 +8,6 @@
       @changePageSize="onChangePageSize"
       @deleteUser-click="onClickedDelete"
       @createdNewUser-click="onClickedCreatedNewUser"
-      @editUser-click="onClickedEditUser"
     ></user-content>
     <user-modal ref="modalRef"> </user-modal>
   </div>
@@ -70,11 +69,7 @@ function onClickedDelete(id: number) {
 
 const modalRef = ref<InstanceType<typeof UserModal>>();
 function onClickedCreatedNewUser() {
-  modalRef.value?.showCreatedDlg();
-}
-
-function onClickedEditUser(item_data: any) {
-  modalRef.value?.showEditUserDlg(item_data);
+  modalRef.value?.setDlgVisible(true);
 }
 </script>
 

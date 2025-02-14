@@ -4,7 +4,7 @@
 export interface T_createUserParams {
   user_account: string;
   user_name: string;
-  gender: string;
+  gender: number;
   mobile: string;
   email: string;
   password: string;
@@ -17,7 +17,7 @@ export interface T_userInfo {
   avatar_path: string;
   create_time: string;
   email: string;
-  gender: string;
+  gender: number;
   has_image_count: number;
   id: number;
   isDeleted: number;
@@ -40,6 +40,8 @@ export interface T_userSystemState {
 export const PAGE_START = 1;
 //每页显示20条数据
 export const PAGE_SIZE = 20;
+export const DEFAULT_GENDER = 3;
+export const DEFAULT_ISENABLE = 2;
 
 /**
  * 查询用户时可以传入搜索的条件
@@ -51,8 +53,8 @@ export interface T_queryUserData {
   user_name: string;
   mobile: string;
   email: string;
-  isEnable: string;
-  gender: string;
+  isEnable: number;
+  gender: number;
 }
 
 /**
@@ -65,8 +67,8 @@ const default_query_condition: T_queryUserData = {
   user_name: '',
   mobile: '',
   email: '',
-  isEnable: '',
-  gender: ''
+  isEnable: DEFAULT_ISENABLE,
+  gender: DEFAULT_GENDER
 };
 
 export default default_query_condition;
