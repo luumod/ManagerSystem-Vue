@@ -28,3 +28,11 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# 服务器端
+/server/*.vs
+/server/out
+/server/dist
+/server/build
+/server/bin
+/bin
