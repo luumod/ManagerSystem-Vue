@@ -1,12 +1,7 @@
 <template>
   <div class="user">
     <!-- 获取子组件的事件 -->
-    <page-search
-      :search-config="searchConfig"
-      @search-click="onClickedSearch"
-      @reset-click="onClickedReset"
-    >
-    </page-search>
+    <user-search :search-config="searchConfig" @search-click="onClickedSearch" @reset-click="onClickedReset"> </user-search>
     <user-content
       ref="contentRef"
       @changePage="onChangePage"
@@ -23,8 +18,7 @@
 </template>
 
 <script setup lang="ts" name="user">
-import searchConfig from './config/search.config';
-import PageSearch from '@/components/page-search/page-search.vue';
+import UserSearch from './c-cpns/user-search.vue';
 import UserContent from './c-cpns/user-content.vue';
 import UserModal from './c-cpns/user-modal.vue';
 import UserModalEdit from './c-cpns/user-modal-edit.vue';
