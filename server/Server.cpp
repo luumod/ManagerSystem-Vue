@@ -202,6 +202,7 @@ QJsonArray createMenuJson(int user_id) {
 		return SResult::error(SResultCode::ParamJsonInvalid);\
 	}\
 
+
 #define CheckArgsJsonParse(request,responder)\
 	QJsonParseError error;\
 	auto jdom = QJsonDocument::fromJson(request.body(), &error);\
@@ -598,6 +599,62 @@ void Server::route_managerUserSystem()
 
 		responder.write(SResult::success(), "application/json");
 		return;
+		});
+
+	//批量用户删除
+	m_server.route("/users", QHttpServerRequest::Method::Delete,
+		[](const QHttpServerRequest& request) {
+			// 校验Token
+			std::optional<QByteArray> token = CheckToken(request);
+			if (token.has_value()) { // Token校验失败
+				return token.value();
+			}
+			CheckJsonParse(request);
+
+			// 获取JSON中的ID列表
+			auto ids = jdom["lists"].toArray();  // 注意字段名改为"lists"
+			qDebug() << ids;
+			if (ids.isEmpty()) {
+				return SResult::error(SResultCode::ParamInvalid, "ID列表不能为空");
+			}
+
+			SSqlConnectionWrap wrap;
+			QSqlQuery query(wrap.openConnection());
+
+			QStringList placeholders;
+			for (int i = 0; i < ids.size(); ++i) {
+				placeholders.append("?");
+			}
+			QString sql = QString("UPDATE user_info SET isDeleted=true WHERE id IN (%1)").arg(placeholders.join(","));
+
+			query.prepare(sql);
+
+			for (const auto& idVal : ids) {
+				bool ok;
+				int id = idVal.toVariant().toInt(&ok);
+				if (!ok) {
+					return SResult::error(SResultCode::ParamInvalid,
+						QString("无效ID: %1").arg(idVal.toString()));
+				}
+				query.addBindValue(id); // 绑定整数类型
+			}
+
+			if (!query.exec()) {
+				// 处理SQL错误
+				CheckSqlQuery(query, responder);
+			}
+
+#if _DEBUG
+			qDebug() << "批量用户删除";
+			qDebug() << query.lastQuery() << '\n';
+			qDebug() << "Bound values:" << query.boundValues(); 
+#endif
+
+			if (query.numRowsAffected() == 0) {
+				return SResult::error(SResultCode::UserNotFound);
+			}
+
+			return SResult::success(SResultCode::Success);
 		});
 
 	//用户修改

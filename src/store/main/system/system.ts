@@ -1,4 +1,5 @@
 import {
+  batchDeleteUserData,
   checkUserAccount,
   createNewUser,
   deleteUserData,
@@ -21,17 +22,25 @@ const useSystemStore = defineStore('system', {
   }),
   actions: {
     async getUserListAction(queryInfo: T_queryUserData = default_query_condition) {
-      const user_list = await getUserListData(queryInfo);
-      const { total_records, list } = user_list.data;
-      this.user_list = list;
-      this.total_count = total_records;
+      await getUserListData(queryInfo).then((user_list) => {
+        const { total_records, list } = user_list.data;
+        this.user_list = list;
+        this.total_count = total_records;
+      });
     },
     async deleteUsersAction(id: number, queryInfo: T_queryUserData) {
       //1. 删除数据
-      await deleteUserData(id);
-
-      //2. 更新列表
-      this.getUserListAction(queryInfo);
+      await deleteUserData(id).then(() => {
+        //2. 更新列表
+        this.getUserListAction(queryInfo);
+      });
+    },
+    async batchDeleteUserAction(ids: number[], queryInfo: T_queryUserData) {
+      //1. 批量删除
+      await batchDeleteUserData(ids).then(() => {
+        //2. 更新列表
+        this.getUserListAction(queryInfo);
+      });
     },
     async createNewUserAction(new_user_params: T_createUserParams) {
       await createNewUser(new_user_params)

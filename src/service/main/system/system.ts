@@ -1,5 +1,9 @@
 import hyRequest from '@/service';
-import type { T_createUserParams, T_queryUserData, T_updateUserInfo } from '@/store/main/system/types';
+import type {
+  T_createUserParams,
+  T_queryUserData,
+  T_updateUserInfo
+} from '@/store/main/system/types';
 
 /**
  * 根据自定义查询条件，查询所有用户列表
@@ -26,6 +30,12 @@ export function deleteUserData(id: number) {
   });
 }
 
+export function batchDeleteUserData(ids: number[]) {
+  return hyRequest.delete({
+    url: `/users`,
+    data: { lists: ids }
+  });
+}
 /**
  * 创建一个新的用户
  * @param new_user_params 新用户信息

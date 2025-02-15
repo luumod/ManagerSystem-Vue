@@ -7,6 +7,7 @@
       @changePage="onChangePage"
       @changePageSize="onChangePageSize"
       @deleteUser-click="onClickedDelete"
+      @batchDeleteUsers-click="onClickedBatchDelete"
       @createdNewUser-click="onClickedCreatedNewUser"
       @editUser-click="onClickedEditUser"
       @changeEnableUser-click="onClickedChanegeEnableUser"
@@ -22,7 +23,10 @@ import UserContent from './c-cpns/user-content.vue';
 import UserModal from './c-cpns/user-modal.vue';
 import UserModalEdit from './c-cpns/user-modal-edit.vue';
 import { ref } from 'vue';
-import default_query_condition, { type T_queryUserData } from '@/store/main/system/types';
+import default_query_condition, {
+  type T_queryUserData,
+  type T_userInfo
+} from '@/store/main/system/types';
 
 // 获content实例对象
 const contentRef = ref<InstanceType<typeof UserContent>>();
@@ -73,6 +77,15 @@ function onChangePageSize(pageSize: number) {
  */
 function onClickedDelete(id: number) {
   contentRef.value?.fetchDeleteUser(id, queryCondition);
+}
+
+/**
+ * 点击批量删除按钮会发送请求，批量删除指定用户（可满足查询条件）
+ * @param user_infos 用户信息数组
+ */
+function onClickedBatchDelete(user_infos: T_userInfo[]) {
+  const ids = user_infos.map((item) => item.id); //获取删除用户的id
+  contentRef.value?.fetchBatchDeleteUsers(ids, queryCondition);
 }
 
 /**

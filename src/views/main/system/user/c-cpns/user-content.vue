@@ -2,10 +2,13 @@
   <div class="user-content">
     <div class="header">
       <h3 class="title">用户列表</h3>
-      <el-button type="primary" @click="onCreatedNewUser">新建用户</el-button>
+      <div class="btns">
+        <el-button type="primary" @click="onCreatedNewUser">新建用户</el-button>
+        <el-button type="danger" @click="onBatchDeleteUsers">批量删除</el-button>
+      </div>
     </div>
     <div class="table">
-      <el-table :data="user_list" border style="width: 100%">
+      <el-table :data="user_list" border style="width: 100%" @selection-change="onSelectionChange">
         <el-table-column align="center" type="selection" width="50" />
         <el-table-column align="center" type="index" label="序号" width="60" />
         <el-table-column align="center" prop="user_account" label="账号" width="200" />
@@ -60,10 +63,15 @@ import useSystemStore from '@/store/main/system/system';
 import default_query_condition, {
   PAGE_SIZE,
   PAGE_START,
-  type T_queryUserData
+  type T_queryUserData,
+  type T_userInfo
 } from '@/store/main/system/types';
+import { ElMessage } from 'element-plus';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+
+//保存多选中选中的多条用户数据行
+const multipleSelection = ref<T_userInfo[]>([]);
 
 //数据
 const currentPage = ref(PAGE_START);
@@ -73,6 +81,7 @@ const emit = defineEmits([
   'changePage',
   'changePageSize',
   'deleteUser-click',
+  'batchDeleteUsers-click',
   'createdNewUser-click',
   'editUser-click',
   'changeEnableUser-click'
@@ -84,6 +93,14 @@ fetchUserListData();
 
 //2. 获取响应式的对象
 const { user_list, total_count } = storeToRefs(systemStore);
+
+/**
+ * 选中的多条用户数据行
+ * @param val 选中的多条用户数据行
+ */
+function onSelectionChange(users: T_userInfo[]) {
+  multipleSelection.value = users;
+}
 
 /**
  * 页面尺寸变化，为了同时满足用户自定义查询条件，发送信号到外部处理
@@ -103,7 +120,7 @@ function onCurrentPageChange() {
  * 处理用户的删除，为了同时满足用户自定义查询条件，发送信号到外部处理
  * @param id 要删除的用户的id
  */
-function onDeleteUser(id: any) {
+function onDeleteUser(id: number) {
   emit('deleteUser-click', id);
 }
 
@@ -132,6 +149,17 @@ function onCreatedNewUser() {
 }
 
 /**
+ * 批量删除用户
+ */
+function onBatchDeleteUsers() {
+  if (multipleSelection.value.length === 0) {
+    ElMessage.error('请先勾选要删除的数据行');
+  } else {
+    emit('batchDeleteUsers-click', multipleSelection.value);
+  }
+}
+
+/**
  * 发送网络请求：查询满足条件的用户列表
  * @param queryInfo 查询条件，默认为空，1页，20条
  */
@@ -149,6 +177,15 @@ function fetchDeleteUser(id: number, queryInfo: T_queryUserData) {
 }
 
 /**
+ * 发送网络请求：批量删除用户
+ * @param ids 要删除的用户的id数组
+ * @param queryInfo 同时满足查询条件
+ */
+function fetchBatchDeleteUsers(ids: number[], queryInfo: T_queryUserData) {
+  systemStore.batchDeleteUserAction(ids, queryInfo);
+}
+
+/**
  * 发送网络请求：更新用户
  * @param item_data 要更新的用户的数据
  * @param queryInfo 同时满足查询条件
@@ -157,7 +194,7 @@ function fetchUpdateUser(item_data: any, queryInfo: T_queryUserData) {
   systemStore.updateUserAction(item_data.id, { isEnable: item_data.isEnable }, queryInfo);
 }
 
-defineExpose({ fetchUserListData, fetchDeleteUser, fetchUpdateUser });
+defineExpose({ fetchUserListData, fetchDeleteUser, fetchUpdateUser, fetchBatchDeleteUsers });
 </script>
 
 <style scoped>
