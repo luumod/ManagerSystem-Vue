@@ -45,7 +45,7 @@
 
 <script setup lang="ts" name="user-modal-edit-edit">
 import useSystemStore from '@/store/main/system/system';
-import type { T_updateUserInfo } from '@/store/main/system/types';
+import type { T_queryUserData, T_updateUserInfo } from '@/store/main/system/types';
 import { ElForm, ElMessage } from 'element-plus';
 import { reactive, ref } from 'vue';
 
@@ -62,11 +62,15 @@ const formData: T_updateUserInfo = reactive({
 const edit_id = ref<number>();
 const formRef = ref<InstanceType<typeof ElForm>>();
 
+//查询条件
+const qC = ref();
 /**
- * 显示修改用户弹窗，并且显示用户基本信息
+ * 显示修改用户弹窗，并且显示用户基本信息，在查询中修改时，可以保持查询条件不变
  * @param item_data 填充的用户信息
+ * @param queryCondition 查询条件
  */
-function showUpdateUserDlg(item_data: any) {
+function showUpdateUserDlg(item_data: any, queryCondition: T_queryUserData) {
+  qC.value = queryCondition;
   dialogVisible.value = true;
   edit_id.value = item_data.id; //保存要修改的这一行的id
   const { user_account, user_name, mobile, email, isEnable, gender } = item_data;
@@ -79,7 +83,7 @@ function showUpdateUserDlg(item_data: any) {
 function handleSubmit() {
   //1. 发送请求
   systemStore
-    .updateUserAction(edit_id.value!, formData)
+    .updateUserAction(edit_id.value!, formData, qC.value)
     .then(() => {
       //2. 显示成功提示
       ElMessage.success('修改用户信息成功！');

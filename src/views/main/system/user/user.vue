@@ -28,7 +28,8 @@ import default_query_condition, { type T_queryUserData } from '@/store/main/syst
 const contentRef = ref<InstanceType<typeof UserContent>>();
 const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
 const modalRef = ref<InstanceType<typeof UserModal>>();
-let queryCondition = default_query_condition;
+//深拷贝：只拷贝浅层属性
+let queryCondition = { ...default_query_condition };
 
 /**
  * 点击查询按钮会发送请求，按用户自定义搜索条件查询用户列表
@@ -44,6 +45,7 @@ function onClickedSearch(formData: T_queryUserData) {
  * 点击重置按钮会发送请求，重置搜索条件，查询所有用户列表
  */
 function onClickedReset() {
+  queryCondition = { ...default_query_condition };
   contentRef.value?.fetchUserListData();
 }
 
@@ -82,11 +84,11 @@ function onClickedChanegeEnableUser(item_data: any) {
 }
 
 /**
- * 点击编辑按钮：显示编辑框，并将用户信息填充到编辑框中
+ * 点击编辑按钮：显示编辑框，并将用户信息填充到编辑框中（可满足查询条件）
  * @param item_data 用户信息
  */
 function onClickedEditUser(item_data: any) {
-  modalEditRef.value?.showUpdateUserDlg(item_data);
+  modalEditRef.value?.showUpdateUserDlg(item_data, queryCondition);
 }
 
 /**
