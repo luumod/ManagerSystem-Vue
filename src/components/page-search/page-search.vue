@@ -10,7 +10,6 @@
         <template v-for="item in props.searchConfig.formItems" :key="item.prop">
           <el-col :span="8">
             <el-form-item :label="item.label" :prop="item.prop">
-
               <template v-if="item.type === 'input'">
                 <el-input
                   v-model="searchForm[item.prop]"
@@ -25,7 +24,6 @@
                   </template>
                 </el-select>
               </template>
-
             </el-form-item>
           </el-col>
         </template>

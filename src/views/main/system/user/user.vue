@@ -7,8 +7,9 @@
       @reset-click="onClickedReset"
     >
     </page-search>
-    <user-content
+    <page-content
       ref="contentRef"
+      :content-config="contentConfig"
       @changePage="onChangePage"
       @changePageSize="onChangePageSize"
       @deleteUser-click="onClickedDelete"
@@ -16,16 +17,19 @@
       @createdNewUser-click="onClickedCreatedNewUser"
       @editUser-click="onClickedEditUser"
       @changeEnableUser-click="onClickedChanegeEnableUser"
-    ></user-content>
+    >
+    </page-content>
     <user-modal ref="modalRef"> </user-modal>
     <user-modal-edit ref="modalEditRef"></user-modal-edit>
   </div>
 </template>
 
 <script setup lang="ts" name="user">
+import contentConfig from './config/content.config';
 import searchConfig from './config/search.config';
 import PageSearch from '@/components/page-search/page-search.vue';
-import UserContent from './c-cpns/user-content.vue';
+import PageContent from '@/components/page-content/page-content.vue';
+
 import UserModal from './c-cpns/user-modal.vue';
 import UserModalEdit from './c-cpns/user-modal-edit.vue';
 import { ref } from 'vue';
@@ -35,7 +39,7 @@ import default_query_condition, {
 } from '@/store/main/system/types';
 
 // 获content实例对象
-const contentRef = ref<InstanceType<typeof UserContent>>();
+const contentRef = ref<InstanceType<typeof PageContent>>();
 const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
 const modalRef = ref<InstanceType<typeof UserModal>>();
 //深拷贝：只拷贝浅层属性
