@@ -20,6 +20,7 @@ export interface T_updateUserInfo {
   email: string;
   isEnable: number;
   gender: number;
+  avatar_path?: string;
 }
 
 /**

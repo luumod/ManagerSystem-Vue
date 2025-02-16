@@ -52,7 +52,6 @@ const loginStore = useLoginStore();
 
 //执行账号登录逻辑
 function loginAction(isRemPwd: boolean) {
-  console.log('loginAction', userAccount.user_account, userAccount.password); //利用axios发送请求
   if (!formRef.value) {
     return;
   }

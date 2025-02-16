@@ -4,6 +4,7 @@
 #include "SHttpPartParse.h"
 #include "SHttpResponseBuilder.h"
 #include "SJwt.h"
+#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -15,6 +16,7 @@
 #include <optional>
 #include <QRandomGenerator>
 #include <QRegularExpression>
+#include <QUuid>
 
 QJsonArray createMenuJson(int user_id) {
 
@@ -274,8 +276,21 @@ std::optional<QByteArray> CheckToken(const QHttpServerRequest& request) {
 	auto auth = request.value("Authorization"); //从headers字段中获取
 	//无token
 	if (auth.isEmpty()) {
-		return SResult::error(SResultCode::UserUnauthenticated);
+		//其次从url参数中获取
+		if (request.query().hasQueryItem("token")) {
+			auto auth_s = request.query().queryItemValue("token"); //从url参数中获取
+			if (auth_s.isEmpty()) {
+				return SResult::error(SResultCode::UserUnauthenticated);
+			}
+			else {
+				auth = QString("Bearer" + auth_s).toLocal8Bit();
+			}
+		}
+		else {
+			return SResult::error(SResultCode::UserAuthFormatError);
+		}
 	}
+	
 	//token不符合规范
 	if (!auth.startsWith("Bearer")) {
 		return SResult::error(SResultCode::UserAuthFormatError);
@@ -322,6 +337,8 @@ Server::Server()
 			responder.write(QJsonDocument(json));
 		});
 
+	QDir::setCurrent(QCoreApplication::applicationDirPath());
+
 	//添加路由
 	checkCORS_OPTIONS(QString("/api/version"));
 	checkCORS_OPTIONS(QString("/login"));
@@ -331,7 +348,7 @@ Server::Server()
 	checkCORS_OPTIONS(QString("/user/create"));
 	checkCORS_OPTIONS(QString("/users"));
 	checkCORS_OPTIONS(QString("/user/<arg>/avatar"));
-	checkCORS_OPTIONS(QString("/images/avatar/<arg>"));
+	checkCORS_OPTIONS(QString("/public/images/avatar/<arg>"));
 	checkCORS_OPTIONS(QString("/check/account/<arg>"));
 	checkCORS_OPTIONS(QString("/role/<arg>/menu"));
 
@@ -345,7 +362,9 @@ Server::Server()
 		resSuccess(QJsonDocument(json).toJson(QJsonDocument::Compact), responder);
 		return ;
 		});
-
+	const QString UPLOAD_DIR = QCoreApplication::applicationDirPath() + "/images/";
+	const QString URL_PREFIX = "/images/";
+	auto p = QUuid::createUuid().toString();
 	route_userLogin();
 	route_managerUserSystem();
 	route_advancedQuery();
@@ -789,27 +808,39 @@ void Server::route_managerUserSystem()
 		}
 		auto parse = SHttpPartParse(data);
 
-
-		
 		if (!parse.parse()) {
 			resError(SResult::error(SResultCode::ParamInvalid), responder);
 			return;
 		}
-		auto path = "../images/avatar/";
+		auto path = QString("/public/images/avatar/");
 		QDir dir;
 		if (!dir.exists(path)) {
 			dir.mkpath(path);
 		}
-		QFile file(QString(path + id + "." + QFileInfo(parse.filename()).suffix()));
+
+		//首先查找原来的头像文件
+		QString old_path;
+		SSqlConnectionWrap wrap;
+		QSqlQuery query(wrap.openConnection());
+		query.prepare(QString("SELECT avatar_path FROM user_info WHERE id=%1").arg(u_id));
+		query.exec();
+		CheckSqlQuery(query,responder);
+
+		if (query.next()) {
+			old_path = query.record().value("avatar_path").toString();
+			QFile::remove(QString("." + old_path));//删除原头像
+		}
+		//没有则不用删除
+
+		auto file_path = path + id + "." + QFileInfo(parse.filename()).suffix();
+		QFile file(QString("." + file_path));
 		if (!file.open(QIODevice::WriteOnly)) {
 			resError(SResult::error(SResultCode::ServerFileError), responder);
 			return;
 		}
 		file.write(parse.data());
 		//把路径写入数据库
-		SSqlConnectionWrap wrap;
-		QSqlQuery query(wrap.openConnection());
-		query.prepare(QString("UPDATE user_info SET avatar_path='%1' WHERE id=%2").arg(file.fileName()).arg(u_id));
+		query.prepare(QString("UPDATE user_info SET avatar_path='%1' WHERE id=%2").arg(file_path).arg(u_id));
 		query.exec();
 #if _DEBUG
 		qDebug() << "用户头像上传";
@@ -818,15 +849,15 @@ void Server::route_managerUserSystem()
 		CheckSqlQuery(query,responder);
 
 		QJsonObject jObj;
-		jObj.insert("url", file.fileName());
+		jObj.insert("url", file_path);
 
 		resSuccess(SResult::success(jObj), responder);
 		return;
 		});
 
 	//用户头像获取: GET
-	m_server.route("/images/avatar/<arg>", QHttpServerRequest::Method::Get,
-		[](const QString& id, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+	m_server.route("/public/images/avatar/<arg>", QHttpServerRequest::Method::Get,
+		[](const QString& image_name, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
 
 		//校验参数
 		std::optional<QByteArray> token = CheckToken(request);
@@ -835,39 +866,20 @@ void Server::route_managerUserSystem()
 			return;
 		}
 		
-		CheckIsInt(id,responder);
-
-		SSqlConnectionWrap wrap;
-		QSqlQuery query(wrap.openConnection());
-		query.prepare(QString("SELECT avatar_path FROM user_info WHERE id=%1 AND isDeleted=false").arg(u_id));
-#if _DEBUG
-		qDebug() << "用户头像获取";
-		qDebug() << query.lastQuery();
-#endif
-		if (!query.exec()) {
-			resError(SResult::error(SResultCode::ServerSqlQueryError), responder);
-			return;
-		}
-		if (!query.next()) {
-			resSuccess(SResult::success(SResultCode::SuccessButNoData), responder);
-			return;
-		}
-
-		auto path = query.value("avatar_path").toString();
-		if (path.isEmpty()) {
-			resSuccess(SResult::success(SResultCode::SuccessButNoData), responder);
-			return;
-		}
-		QFile file(path);
+		auto path = "/public/images/avatar/" + image_name;
+		QFile file("." + path);
 		if (!file.open(QIODevice::ReadOnly)) {
 			resError(SResult::error(SResultCode::ServerFileError, "头像未找到"), responder);
 			return;
 		}
-		responder.writeStatusLine();
-		responder.writeHeader("Content-Type", QString("image/%1").arg(QFileInfo(file.fileName()).suffix()).toUtf8());
-		responder.writeHeader("Content-Length", QByteArray::number(file.size()));
-		responder.writeHeader("Content-Disposition", "attachment; filename=" + file.fileName().toUtf8());
-		responder.writeBody(file.readAll());
+
+		SHttpResponseBuilder(file.readAll())
+			.addCORS()
+			.addHeader("Content-Type", QString("image/%1").arg(QFileInfo(file.fileName()).suffix()).toUtf8())
+			.addHeader("Content-Length", QByteArray::number(file.size()))
+			.addHeader("Content-Disposition", "inline;  filename=" + file.fileName().toUtf8())
+			.send(responder);
+		return;
 		});
 }
 

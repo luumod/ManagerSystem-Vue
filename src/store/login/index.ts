@@ -37,7 +37,7 @@ const useLoginStore = defineStore('login', {
 
       //2. token本地缓存
       localCache.setCache(LOGIN_TOKEN, this.token);
-      debugger;
+
       //3. 获取登录用户的详细信息
       const userInfo = await getUserInfoById(id);
       this.user_info = userInfo.data;

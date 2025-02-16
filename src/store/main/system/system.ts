@@ -68,6 +68,12 @@ const useSystemStore = defineStore('system', {
         .catch((error) => {
           throw error; //账号重复
         });
+    },
+    updateUserAvatar(userId: number, newAvatarUrl: string) {
+      const user = this.user_list.find((u) => u.id === userId);
+      if (user) {
+        user.avatar_path = newAvatarUrl;
+      }
     }
   }
 });

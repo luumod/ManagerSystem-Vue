@@ -7,7 +7,7 @@ set(cmake_autorcc ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(cmake_cxx_standard_required ON)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
 find_package(Qt6 REQUIRED COMPONENTS Core Sql HttpServer)
 

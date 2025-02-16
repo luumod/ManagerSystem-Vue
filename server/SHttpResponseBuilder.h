@@ -10,7 +10,7 @@ public:
 	}
 
 	explicit SHttpResponseBuilder(const QByteArray& data,
-		QHttpServerResponder::StatusCode statusCode)
+		QHttpServerResponder::StatusCode statusCode = QHttpServerResponder::StatusCode::Ok)
 		: responseData(data), statusCode(statusCode) {
 	}
 

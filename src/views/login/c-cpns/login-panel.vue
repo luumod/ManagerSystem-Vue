@@ -85,7 +85,6 @@ function handleLogin() {
     //2. 调用子组件的方法: loginAction
     accountRef.value?.loginAction(isRememberPwd.value); //可选链：一开始为null
   } else {
-    console.log('手机登录');
   }
 }
 </script>
