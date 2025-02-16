@@ -7,6 +7,8 @@ class Server {
 public:
 	Server();
 
+
+
 private:
 	QHttpServer m_server;
 

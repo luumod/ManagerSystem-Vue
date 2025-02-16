@@ -2,6 +2,7 @@
 #include "SResultCode.h"
 #include "SSqlConnectionPool.h"
 #include "SHttpPartParse.h"
+#include "SHttpResponseBuilder.h"
 #include "SJwt.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -195,39 +196,45 @@ QJsonArray createMenuJson(int user_id) {
 	return dataArray;
 }
 
-#define CheckJsonParse(request)\
+
+#define resSuccess(data,responder)\
+	SHttpResponseBuilder(data, QHttpServerResponder::StatusCode::Ok)\
+	.addCORS()\
+	.addHeader("Content-Type", "application/json")\
+	.send(responder); \
+
+#define resNoContent(responder)\
+	SHttpResponseBuilder(QHttpServerResponder::StatusCode::NoContent)\
+	.addCORS()\
+	.addHeader("Content-Type", "application/json")\
+	.send(responder); \
+
+#define resError(data, responder)\
+	SHttpResponseBuilder(data,QHttpServerResponder::StatusCode::BadRequest)\
+	.addCORS()\
+	.addHeader("Content-Type", "application/json")\
+	.send(responder); \
+
+#define CheckJsonParse(request,responder)\
 	QJsonParseError error;\
 	auto jdom = QJsonDocument::fromJson(request.body(), &error);\
 	if (error.error != QJsonParseError::NoError) {\
-		return SResult::error(SResultCode::ParamJsonInvalid);\
-	}\
-
-
-#define CheckArgsJsonParse(request,responder)\
-	QJsonParseError error;\
-	auto jdom = QJsonDocument::fromJson(request.body(), &error);\
-	if (error.error != QJsonParseError::NoError) {\
-		responder.write(SResult::error(SResultCode::ParamJsonInvalid), "application/json");\
+		resError(SResult::error(SResultCode::ParamJsonInvalid), responder)\
 		return;\
 	}\
 
-#define CheckSqlQuery(query)\
+#define CheckSqlQuery(query,responder)\
 	if (query.lastError().type() != QSqlError::NoError) {\
-		return SResult::error(SResultCode::ServerSqlQueryError);\
-	}\
-
-#define CheckArgsSqlQuery(query,responder)\
-	if (query.lastError().type() != QSqlError::NoError) {\
-		responder.write(SResult::error(SResultCode::ServerSqlQueryError), "application/json");\
+		resError(SResult::error(SResultCode::ServerSqlQueryError), responder)\
 		return;\
 	}\
 
 //检查user_id是否为有效整数
-#define CheckIsInt(user_id)\
+#define CheckIsInt(user_id,responder)\
 	bool ok;\
 	int u_id = user_id.toInt(&ok);\
 	if (!ok) {\
-		responder.write(SResult::error(SResultCode::UserNotFound), "application/json");\
+		resError(SResult::error(SResultCode::UserNotFound), responder)\
 		return;\
 	}
 
@@ -289,6 +296,20 @@ std::optional<QByteArray> CheckToken(const QHttpServerRequest& request) {
 
 Server::Server()
 {
+#define checkCORS_OPTIONS(path) \
+	if (path.contains("<arg>")){\
+		m_server.route(path, QHttpServerRequest::Method::Options, \
+			[](const QString& arg ,const QHttpServerRequest& request, QHttpServerResponder&& responder) { \
+			resNoContent(responder); \
+			}); \
+	}\
+	else {\
+		m_server.route(path, QHttpServerRequest::Method::Options, \
+			[](const QHttpServerRequest& request, QHttpServerResponder&& responder) { \
+			resNoContent(responder); \
+			}); \
+	}\
+
 	//开启服务器
 	m_server.listen(QHostAddress::Any, 8888);
 
@@ -302,13 +323,27 @@ Server::Server()
 		});
 
 	//添加路由
-	m_server.route("/api/version", [](const QHttpServerRequest& request) {
+	checkCORS_OPTIONS(QString("/api/version"));
+	checkCORS_OPTIONS(QString("/login"));
+	checkCORS_OPTIONS(QString("/register"));
+	checkCORS_OPTIONS(QString("/user/<arg>"));
+	checkCORS_OPTIONS(QString("/user/list"));
+	checkCORS_OPTIONS(QString("/user/create"));
+	checkCORS_OPTIONS(QString("/users"));
+	checkCORS_OPTIONS(QString("/user/<arg>/avatar"));
+	checkCORS_OPTIONS(QString("/images/avatar/<arg>"));
+	checkCORS_OPTIONS(QString("/check/account/<arg>"));
+	checkCORS_OPTIONS(QString("/role/<arg>/menu"));
+
+	m_server.route("/api/version", [](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
 		QJsonObject json;
 		json.insert("version", "1.0.0");
 		json.insert("name", "UserImageManager-Server");
 		json.insert("datetime", QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"));
 		json.insert("copyright", "Copyright © 2025 Yuleo");
-		return QJsonDocument(json).toJson(QJsonDocument::Compact);
+
+		resSuccess(QJsonDocument(json).toJson(QJsonDocument::Compact), responder);
+		return ;
 		});
 
 	route_userLogin();
@@ -319,9 +354,10 @@ Server::Server()
 void Server::route_userLogin()
 {
 	//用户登录
-	m_server.route("/login", [](const QHttpServerRequest& request) {
-		CheckJsonParse(request);
-
+	m_server.route("/login",
+		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+		
+		CheckJsonParse(request,responder);
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
 		query.prepare(QString("SELECT * FROM user_info WHERE user_account='%1' AND password='%2' LIMIT 1")
@@ -331,21 +367,24 @@ void Server::route_userLogin()
 #if _DEBUG
 		qDebug() << "用户登录" << query.lastQuery();
 #endif
-		CheckSqlQuery(query);
+		CheckSqlQuery(query,responder);
 
 		//是否查询到数据
 		if (!query.next()) {
-			return SResult::error(SResultCode::UserLoginError);
+			resError(SResult::error(SResultCode::UserLoginError), responder);
+			return;
 		}
 
 		//检查用户是否禁用
 		if (query.value("isEnable").toInt() == 2) {
-			return SResult::success(SResultCode::UserDisabled);
+			resError(SResult::error(SResultCode::UserDisabled), responder);
+			return;
 		}
 
 		//检查用户是否被删除
 		if (query.value("isDeleted").toBool()) {
-			return SResult::success(SResultCode::UserDeleted);
+			resError(SResult::error(SResultCode::UserDeleted), responder);
+			return;
 		}
 
 		//生成token jwt
@@ -372,12 +411,14 @@ void Server::route_userLogin()
 		jLoginUser.insert("token", QString(jwtObject.jwt()));
 
 		//{ {"token",QString(jwtObject.jwt())} }
-		return SResult::success(jLoginUser); //回复用户登录时生成的token（QJsonObject形式）
+		resSuccess(SResult::success(jLoginUser), responder);
+		return;
 		});
 
 	//用户注册
-	m_server.route("/register", [](const QHttpServerRequest& request) {
-		CheckJsonParse(request);
+	m_server.route("/register", QHttpServerRequest::Method::Post,
+		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+		CheckJsonParse(request,responder);
 
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
@@ -391,16 +432,17 @@ void Server::route_userLogin()
 		qDebug() << "用户注册";
 		qDebug() << query.lastQuery();
 #endif
-		CheckSqlQuery(query);
+		CheckSqlQuery(query,responder);
 
 		//检查是否插入成功
 		if (query.numRowsAffected() == 0) {
-			return SResult::error(SResultCode::UserAlreadyExists);
+			resError(SResult::error(SResultCode::UserAlreadyExists), responder);
+			return;
 		}
 		//注册成功
 
-
-		return SResult::success();
+		resSuccess(SResult::success(), responder);
+		return;
 		});
 }
 
@@ -412,11 +454,11 @@ void Server::route_managerUserSystem()
 		//校验参数
 		std::optional<QByteArray> token = CheckToken(request);
 		if (token.has_value()) { //token校验失败
-			responder.write(token.value(), "application/json");
+			resError(token.value(), responder);
 			return;
 		}
 
-		CheckIsInt(id);
+		CheckIsInt(id,responder);
 
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
@@ -428,25 +470,28 @@ void Server::route_managerUserSystem()
 		qDebug() << "查询用户信息";
 		qDebug() << query.lastQuery()<<'\n';
 #endif
-		CheckArgsSqlQuery(query, responder);
+		CheckSqlQuery(query, responder);
 
 		//查询到数据
 		if (!query.next()) {
-			responder.write(SResult::error(SResultCode::UserNotFound), "application/json");
+			resError(SResult::error(SResultCode::UserNotFound), responder);
 			return;
 		}
-		responder.write(SResult::success(recordToJson(query.record())), "application/json");
+
+		resSuccess(SResult::success(recordToJson(query.record())), responder);
 		return;
 		});
-
-	//查询用户列表
-	m_server.route("/user/list", QHttpServerRequest::Method::Post, [](const QHttpServerRequest& request) {
-		CheckJsonParse(request);
+	
+	//用户列表查询
+	m_server.route("/user/list", QHttpServerRequest::Method::Post,
+		[=](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+		CheckJsonParse(request, responder);
 
 		//校验参数
 		std::optional<QByteArray> token = CheckToken(request);
 		if (token.has_value()) { //token校验失败
-			return token.value();
+			resError(token.value(), responder);
+			return;
 		}
 
 		auto page = jdom["page"].toInt();
@@ -493,8 +538,7 @@ void Server::route_managerUserSystem()
 		if (pageSize == 0) {
 			pageSize = 20;//默认每页20条数据
 		}
-		//计算总页数
-		//56 / 20 = 2; 56 % 20 > 0; => 2 + 1 = 3 总共三页
+
 		auto last_page = total_records / pageSize + (total_records % pageSize ? 1 : 0);
 		if (page > last_page || page < 1) {
 			page = 1;  // 超出范围，返回第一页
@@ -508,7 +552,7 @@ void Server::route_managerUserSystem()
 		qDebug() << "查询用户信息";
 		qDebug() << query.lastQuery() << '\n';
 #endif
-		CheckSqlQuery(query);
+		//CheckSqlQuery(query);
 
 		QJsonObject jobj;
 		QJsonArray array;
@@ -521,24 +565,30 @@ void Server::route_managerUserSystem()
 		jobj.insert("page_size", pageSize);
 		jobj.insert("last_page", last_page);
 		jobj.insert("total_records", total_records);
-		return SResult::success(jobj);
+
+
+		resSuccess(SResult::success(jobj), responder);
+		return;
 		});
 
 	//用户创建
-	m_server.route("/user/create", QHttpServerRequest::Method::Post, [](const QHttpServerRequest& request) {
-		CheckJsonParse(request);
+	m_server.route("/user/create", QHttpServerRequest::Method::Post, 
+		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+		CheckJsonParse(request,responder);
 
 		//校验参数
 		std::optional<QByteArray> token = CheckToken(request);
 		if (token.has_value()) { //token校验失败
-			return token.value();
+			resError(token.value(), responder);
+			return;
 		}
 
 		//检查参数完整性
 		auto rObj = jdom.object();
 		if (!rObj.contains("user_account") ||
 			!rObj.contains("user_name")) {
-			return SResult::error(SResultCode::ParamMissing);
+			resError(SResult::error(SResultCode::ParamMissing), responder);
+			return ;
 		}
 		auto password = rObj.value("password").toString();
 		if (password.isEmpty()) {
@@ -559,14 +609,16 @@ void Server::route_managerUserSystem()
 		qDebug() << "用户创建";
 		qDebug() << query.lastQuery() << '\n';
 #endif
-		CheckSqlQuery(query);
+		CheckSqlQuery(query,responder);
 
 		//检查是否插入成功
 		if (query.numRowsAffected() == 0) {
-			return SResult::error(SResultCode::UserAlreadyExists);
+			resError(SResult::error(SResultCode::UserAlreadyExists), responder);
+			return;
 		}
 
-		return SResult::success();
+		resSuccess(SResult::success(), responder);
+		return;
 		});
 
 	//用户删除
@@ -575,11 +627,11 @@ void Server::route_managerUserSystem()
 		//校验参数
 		std::optional<QByteArray> token = CheckToken(request);
 		if (token.has_value()) { //token校验失败
-			responder.write(token.value(), "application/json");
+			resError(token.value(), responder);
 			return;
 		}
 		
-		CheckIsInt(id);
+		CheckIsInt(id,responder);
 
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
@@ -589,33 +641,36 @@ void Server::route_managerUserSystem()
 		qDebug() << "用户删除";
 		qDebug() << query.lastQuery() << '\n';
 #endif
-		CheckArgsSqlQuery(query, responder);
+		CheckSqlQuery(query, responder);
 
 		//检查是否更新成功
 		if (query.numRowsAffected() == 0) {
-			responder.write(SResult::error(SResultCode::UserNotFound), "application/json");
+			resError(SResult::error(SResultCode::UserNotFound), responder);
 			return;
 		}
 
-		responder.write(SResult::success(), "application/json");
+		resSuccess(SResult::success(), responder);
 		return;
 		});
 
 	//批量用户删除
 	m_server.route("/users", QHttpServerRequest::Method::Delete,
-		[](const QHttpServerRequest& request) {
+		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+			CheckJsonParse(request,responder);
+
 			// 校验Token
 			std::optional<QByteArray> token = CheckToken(request);
 			if (token.has_value()) { // Token校验失败
-				return token.value();
+				resError(token.value(), responder);
+				return;
 			}
-			CheckJsonParse(request);
 
 			// 获取JSON中的ID列表
 			auto ids = jdom["lists"].toArray();  // 注意字段名改为"lists"
 			qDebug() << ids;
 			if (ids.isEmpty()) {
-				return SResult::error(SResultCode::ParamInvalid, "ID列表不能为空");
+				resError(SResult::error(SResultCode::ParamInvalid, "ID列表不能为空"), responder);
+				return;
 			}
 
 			SSqlConnectionWrap wrap;
@@ -633,8 +688,8 @@ void Server::route_managerUserSystem()
 				bool ok;
 				int id = idVal.toVariant().toInt(&ok);
 				if (!ok) {
-					return SResult::error(SResultCode::ParamInvalid,
-						QString("无效ID: %1").arg(idVal.toString()));
+					resError(SResult::error(SResultCode::ParamInvalid, QString("无效ID: %1").arg(idVal.toString())), responder);
+					return;
 				}
 				query.addBindValue(id); // 绑定整数类型
 			}
@@ -651,26 +706,27 @@ void Server::route_managerUserSystem()
 #endif
 
 			if (query.numRowsAffected() == 0) {
-				return SResult::error(SResultCode::UserNotFound);
+				resError(SResult::error(SResultCode::UserNotFound), responder);
+				return;
 			}
 
-			return SResult::success(SResultCode::Success);
+			resSuccess(SResult::success(), responder);
+			return;
 		});
 
 	//用户修改
 	m_server.route("/user/<arg>", QHttpServerRequest::Method::Patch,
 		[](const QString& id, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+		CheckJsonParse(request, responder);
 
 		//校验参数
 		std::optional<QByteArray> token = CheckToken(request);
 		if (token.has_value()) { //token校验失败
-			responder.write(token.value(), "application/json");
+			resError(token.value(), responder);
 			return;
 		}
 
-		CheckArgsJsonParse(request, responder);
-
-		CheckIsInt(id);
+		CheckIsInt(id,responder);
 
 		auto rObj = jdom.object();
 		QString sql = "UPDATE user_info SET ";
@@ -703,16 +759,115 @@ void Server::route_managerUserSystem()
 		qDebug() << "用户修改";
 		qDebug() << query.lastQuery();
 #endif
-		CheckArgsSqlQuery(query, responder);
+		CheckSqlQuery(query, responder);
 
 		//检查是否更新成功
 		if (query.numRowsAffected() == 0) {
-			responder.write(SResult::success(SResultCode::SuccessButNoData), "application/json");
+			resSuccess(SResult::success(SResultCode::SuccessButNoData), responder);
 			return;
 		}
 
-		responder.write(SResult::success(), "application/json"); 
+		resSuccess(SResult::success(), responder);
 		return;
+		});
+
+	//用户头像上传: POST
+	m_server.route("/user/<arg>/avatar", QHttpServerRequest::Method::Post,
+		[](const QString& id, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+		//校验参数
+		std::optional<QByteArray> token = CheckToken(request);
+		if (token.has_value()) { //token校验失败
+			resError(token.value(), responder);
+			return;
+		}
+		CheckIsInt(id,responder);
+
+		auto data = request.body();
+		if (data.isEmpty()) {
+			resError(SResult::error(SResultCode::ParamMissing), responder);
+			return;
+		}
+		auto parse = SHttpPartParse(data);
+
+
+		
+		if (!parse.parse()) {
+			resError(SResult::error(SResultCode::ParamInvalid), responder);
+			return;
+		}
+		auto path = "../images/avatar/";
+		QDir dir;
+		if (!dir.exists(path)) {
+			dir.mkpath(path);
+		}
+		QFile file(QString(path + id + "." + QFileInfo(parse.filename()).suffix()));
+		if (!file.open(QIODevice::WriteOnly)) {
+			resError(SResult::error(SResultCode::ServerFileError), responder);
+			return;
+		}
+		file.write(parse.data());
+		//把路径写入数据库
+		SSqlConnectionWrap wrap;
+		QSqlQuery query(wrap.openConnection());
+		query.prepare(QString("UPDATE user_info SET avatar_path='%1' WHERE id=%2").arg(file.fileName()).arg(u_id));
+		query.exec();
+#if _DEBUG
+		qDebug() << "用户头像上传";
+		qDebug() << query.lastQuery();
+#endif
+		CheckSqlQuery(query,responder);
+
+		QJsonObject jObj;
+		jObj.insert("url", file.fileName());
+
+		resSuccess(SResult::success(jObj), responder);
+		return;
+		});
+
+	//用户头像获取: GET
+	m_server.route("/images/avatar/<arg>", QHttpServerRequest::Method::Get,
+		[](const QString& id, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+
+		//校验参数
+		std::optional<QByteArray> token = CheckToken(request);
+		if (token.has_value()) { //token校验失败
+			resError(token.value(), responder)
+			return;
+		}
+		
+		CheckIsInt(id,responder);
+
+		SSqlConnectionWrap wrap;
+		QSqlQuery query(wrap.openConnection());
+		query.prepare(QString("SELECT avatar_path FROM user_info WHERE id=%1 AND isDeleted=false").arg(u_id));
+#if _DEBUG
+		qDebug() << "用户头像获取";
+		qDebug() << query.lastQuery();
+#endif
+		if (!query.exec()) {
+			resError(SResult::error(SResultCode::ServerSqlQueryError), responder);
+			return;
+		}
+		if (!query.next()) {
+			resSuccess(SResult::success(SResultCode::SuccessButNoData), responder);
+			return;
+		}
+
+		auto path = query.value("avatar_path").toString();
+		if (path.isEmpty()) {
+			resSuccess(SResult::success(SResultCode::SuccessButNoData), responder);
+			return;
+		}
+		QFile file(path);
+		if (!file.open(QIODevice::ReadOnly)) {
+			resError(SResult::error(SResultCode::ServerFileError, "头像未找到"), responder);
+			return;
+		}
+		responder.writeStatusLine();
+		responder.writeHeader("Content-Type", QString("image/%1").arg(QFileInfo(file.fileName()).suffix()).toUtf8());
+		responder.writeHeader("Content-Length", QByteArray::number(file.size()));
+		responder.writeHeader("Content-Disposition", "attachment; filename=" + file.fileName().toUtf8());
+		responder.writeBody(file.readAll());
 		});
 }
 
@@ -724,7 +879,7 @@ void Server::route_advancedQuery() {
 			// 校验Token
 			std::optional<QByteArray> token = CheckToken(request);
 			if (token.has_value()) {
-				responder.write(token.value(), "application/json");
+				resError(token.value(), responder);
 				return;
 			}
 
@@ -736,14 +891,15 @@ void Server::route_advancedQuery() {
 			qDebug() << "检查用户账号是否重复";
 			qDebug() << query.lastQuery() << '\n';
 #endif
-			CheckArgsSqlQuery(query, responder);
+			CheckSqlQuery(query, responder);
 
 			// 查询到数据
 			if (query.next()) {
-				responder.write(SResult::error(SResultCode::AccountAleadyExists), "application/json");
+				resError(SResult::error(SResultCode::AccountAleadyExists), responder);
 				return;
 			}
-			responder.write(SResult::success(), "application/json");
+
+			resSuccess(SResult::success(), responder);
 			return;
 
 		});
@@ -755,15 +911,17 @@ void Server::route_advancedQuery() {
 			// 校验Token
 			std::optional<QByteArray> token = CheckToken(request);
 			if (token.has_value()) {
-				responder.write(token.value(), "application/json");
+				resError(token.value(), responder);
 				return;
 			}
 
-			CheckIsInt(user_id);
+			CheckIsInt(user_id,responder);
 
 			// 根据userId生成菜单
 			QJsonArray array = createMenuJson(u_id); // 假设已调整该函数接收userId
-			responder.write(SResult::success_menu(array), "application/json");
+
+			resSuccess(SResult::success_menu(array), responder);
+			return;
 		});
 
 }
