@@ -1,6 +1,6 @@
 import type PageContent from '@/components/page-content/page-content.vue';
 import type { T_queryImageData, T_queryUserData, T_userInfo } from '@/store/main/system/types';
-import type UserModalEdit from '@/views/main/system/user/c-cpns/user-modal-edit.vue';
+import type UserModalEdit from '@/components/page-edit/page-modalEdit.vue';
 import type UserModal from '@/views/main/system/user/c-cpns/user-modal.vue';
 import { ref, type Ref } from 'vue';
 
@@ -22,7 +22,7 @@ function usePageContent(conditionRef: Ref<any>) {
   const contentRef = ref<InstanceType<typeof PageContent>>();
   const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
   const modalRef = ref<InstanceType<typeof UserModal>>();
-  
+
   type FetchListMethods = {
     fetchUserListData: T_queryUserData;
     fetchImageListData: T_queryImageData;
@@ -106,7 +106,7 @@ function usePageContent(conditionRef: Ref<any>) {
 
   /**
    * 点击编辑按钮：显示编辑框，并将用户信息填充到编辑框中（可满足查询条件）
-   * @param item_data 用户信息
+   * @param item_data 数据行信息
    */
   function onClickedEditUser(item_data: any) {
     modalEditRef.value?.showUpdateUserDlg(item_data, conditionRef.value);

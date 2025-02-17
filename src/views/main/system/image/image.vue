@@ -8,11 +8,12 @@
       @changePageSize="onChangePageSize"
       @deleteUser-click="onClickedDelete"
       @batchDeleteUsers-click="onClickedBatchDelete"
+      @editUser-click="onClickedEditUser"
     >
       <template v-slot:image_path="scope">
         <el-image
           style="width: 100px; height: 100px"
-          :src="`${BASE_URL}${scope.row.image_path}`"
+          :src="`${BASE_URL}${scope.row.image_path}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`"
           fit="cover"
         >
           <template #error>
@@ -23,33 +24,38 @@
         </el-image>
       </template>
     </page-content>
+    <page-modalEdit ref="modalEditRef" :modal-edit-config="modalEditConfig"></page-modalEdit>
   </div>
 </template>
 
 <script setup lang="ts" name="image">
 import pageSearch from '@/components/page-search/page-search.vue';
 import pageContent from '@/components/page-content/page-content.vue';
+import PageModalEdit from '@/components/page-edit/page-modalEdit.vue';
 
 import contentConfig from './config/content.config';
 import searchConfig from './config/search.config';
+import modalEditConfig from './config/modalEdit.config';
 import usePageContent from '@/hooks/usePageContent';
 import { BASE_URL } from '@/service/config';
 import { ref } from 'vue';
 import { default_queryImage_condition, type T_queryImageData } from '@/store/main/system/types';
+import { localCache } from '@/utils/cache';
+import { LOGIN_TOKEN } from '@/global/constants';
 //import usePageSearch from '@/hooks/usePageSearch';
 
 const imageCondition = ref<T_queryImageData>({ ...default_queryImage_condition });
 const {
   contentRef,
   // modalRef,
-  // modalEditRef,
+  modalEditRef,
   //conditionRef,
   createPageChanger,
   createPageSizeChanger,
   createOnClickedDeleteChanger,
-  createOnClickedBatchDeleteChanger
+  createOnClickedBatchDeleteChanger,
   // onClickedChanegeEnableUser,
-  // onClickedEditUser,
+  onClickedEditUser
   // onClickedCreatedNewUser
 } = usePageContent(imageCondition);
 

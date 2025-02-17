@@ -20,18 +20,19 @@
     >
     </page-content>
     <user-modal ref="modalRef"> </user-modal>
-    <user-modal-edit ref="modalEditRef"></user-modal-edit>
+    <page-modalEdit ref="modalEditRef" :modal-edit-config="modalEditConfig"></page-modalEdit>
   </div>
 </template>
 
 <script setup lang="ts" name="user">
 import contentConfig from './config/content.config';
 import searchConfig from './config/search.config';
+import modalEditConfig from './config/modalEdit.config';
 import PageSearch from '@/components/page-search/page-search.vue';
 import PageContent from '@/components/page-content/page-content.vue';
+import PageModalEdit from '@/components/page-edit/page-modalEdit.vue';
 
 import UserModal from './c-cpns/user-modal.vue';
-import UserModalEdit from './c-cpns/user-modal-edit.vue';
 import usePageSearch from '@/hooks/usePageSearch';
 import usePageContent from '@/hooks/usePageContent';
 import { default_query_condition, type T_queryUserData } from '@/store/main/system/types';

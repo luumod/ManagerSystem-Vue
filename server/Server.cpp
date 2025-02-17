@@ -1116,11 +1116,11 @@ void Server::route_imageManagement()
 		[](const QString& owner_id, const QString& image_name, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
 
 			//校验参数
-			//std::optional<QByteArray> token = CheckToken(request);
-			//if (token.has_value()) { //token校验失败
-			//	resError(token.value(), responder)
-			//		return;
-			//}
+			std::optional<QByteArray> token = CheckToken(request);
+			if (token.has_value()) { //token校验失败
+				resError(token.value(), responder)
+					return;
+			}
 
 			auto path = "/public/images/upload/" + owner_id + "/" + image_name;
 			QFile file("." + path);
