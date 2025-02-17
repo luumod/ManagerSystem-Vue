@@ -63,7 +63,7 @@ function loginAction(isRemPwd: boolean) {
       const password = userAccount.password;
 
       //2. 发送网络请求（丢弃响应式）
-      loginStore.accountLoginAction({ user_account, password }).then((res) => {
+      loginStore.accountLoginAction({ user_account, password }).then(() => {
         //3. 判断是否需要记住密码
         if (isRemPwd) {
           localCache.setCache(LOGIN_USER_ACCOUNT, user_account);

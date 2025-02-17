@@ -153,13 +153,18 @@ function handleAvatarSuccess(response: any) {
  */
 function handleSubmit() {
   //1. 发送请求
-  systemStore.updateUserAction(edit_id.value!, formData, queryCondition.value).then(() => {
-    //2. 显示成功提示
-    ElMessage.success('修改用户信息成功！');
+  systemStore
+    .updateUserAction(edit_id.value!, formData, queryCondition.value)
+    .then(() => {
+      //2. 显示成功提示
+      ElMessage.success('修改用户信息成功！');
 
-    //3. 刷新列表
-    formRef.value?.resetFields();
-  });
+      //3. 刷新列表
+      formRef.value?.resetFields();
+    })
+    .catch(() => {
+      ElMessage.info('取消修改');
+    });
   dialogVisible.value = false;
 }
 
