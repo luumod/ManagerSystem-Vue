@@ -1,5 +1,5 @@
 import type { T_queryUserData } from '@/store/main/system/types';
-import default_query_condition from '@/store/main/system/types';
+import { default_query_condition } from '@/store/main/system/types';
 import { type Ref } from 'vue';
 
 /**
@@ -9,7 +9,7 @@ import { type Ref } from 'vue';
  * @returns onClickedSearch: 查询
  * @returns onClickedReset: 重置
  */
-function usePageSearch(contentRef: any, conditionRef: Ref<T_queryUserData>) {
+function usePageSearch(contentRef: any, conditionRef: Ref<any>) {
   /**
    * 点击查询按钮会发送请求，按用户自定义搜索条件查询用户列表
    * @param formData 用户搜索条件

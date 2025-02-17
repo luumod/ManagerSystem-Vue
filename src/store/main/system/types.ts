@@ -42,24 +42,43 @@ export interface T_userInfo {
 }
 
 /**
+ * 一个图片的全部基本信息
+ */
+export interface T_imageInfo {
+  description: string;
+  image_ResolutionRatio: string;
+  image_download: number;
+  image_format: string;
+  image_id: number;
+  image_name: string;
+  image_path: string;
+  image_share: number;
+  image_size: number;
+  image_type: string;
+  owner_id: number;
+  upload_time: string;
+}
+
+/**
  * store中存储的用户列表的信息
  */
 export interface T_userSystemState {
   user_list: T_userInfo[];
   total_count: number;
+
+  image_list_byID: T_imageInfo[];
+  total_image_count_byID: number;
 }
 
-//查询用户信息时从1页开始
-export const PAGE_START = 1;
-//每页显示20条数据
-export const PAGE_SIZE = 20;
-
 /**
- * 查询用户时可以传入搜索的条件
+ * 默认查询用户的条件
  */
-export interface T_queryUserData {
+export interface T_queryCondition {
   page: number;
   pageSize: number;
+}
+
+export interface T_queryUserData extends T_queryCondition {
   user_account: string;
   user_name: string;
   mobile: string;
@@ -68,12 +87,17 @@ export interface T_queryUserData {
   gender: number;
 }
 
-/**
- * 默认查询用户的条件
- */
+export interface T_queryImageData extends T_queryCondition {
+  image_name: string;
+  image_type: string;
+  image_format: string;
+  image_share: number;
+  image_download: number;
+}
+
 const default_query_condition: T_queryUserData = {
-  page: PAGE_START,
-  pageSize: PAGE_SIZE,
+  page: 1,
+  pageSize: 20,
   user_account: '',
   user_name: '',
   mobile: '',
@@ -82,4 +106,14 @@ const default_query_condition: T_queryUserData = {
   gender: 0
 };
 
-export default default_query_condition;
+const default_queryImage_condition: T_queryImageData = {
+  page: 1,
+  pageSize: 6,
+  image_name: '',
+  image_type: '',
+  image_format: '',
+  image_share: 0,
+  image_download: 0
+};
+
+export { default_query_condition, default_queryImage_condition };

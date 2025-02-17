@@ -34,24 +34,42 @@ import UserModal from './c-cpns/user-modal.vue';
 import UserModalEdit from './c-cpns/user-modal-edit.vue';
 import usePageSearch from '@/hooks/usePageSearch';
 import usePageContent from '@/hooks/usePageContent';
+import { default_query_condition, type T_queryUserData } from '@/store/main/system/types';
+import { ref } from 'vue';
 
-// 获content实例对象
+const userCondition = ref<T_queryUserData>({ ...default_query_condition });
 
 const {
   contentRef,
   modalRef,
   modalEditRef,
-  conditionRef,
-  onChangePage,
-  onChangePageSize,
-  onClickedDelete,
-  onClickedBatchDelete,
+  createPageChanger,
+  createPageSizeChanger,
+  createOnClickedDeleteChanger,
+  createOnClickedBatchDeleteChanger,
   onClickedChanegeEnableUser,
   onClickedEditUser,
   onClickedCreatedNewUser
-} = usePageContent();
+} = usePageContent(userCondition);
 
-const { onClickedSearch, onClickedReset } = usePageSearch(contentRef, conditionRef);
+const onChangePage = createPageChanger({
+  condRef: userCondition,
+  fetchMethod: 'fetchUserListData'
+});
+const onChangePageSize = createPageSizeChanger({
+  condRef: userCondition,
+  fetchMethod: 'fetchUserListData'
+});
+const onClickedDelete = createOnClickedDeleteChanger({
+  condRef: userCondition,
+  fetchMethod: 'fetchDeleteUser'
+});
+const onClickedBatchDelete = createOnClickedBatchDeleteChanger({
+  condRef: userCondition,
+  fetchMethod: 'fetchBatchDeleteUsers'
+});
+
+const { onClickedSearch, onClickedReset } = usePageSearch(contentRef, userCondition);
 </script>
 
 <style scoped lang="less">

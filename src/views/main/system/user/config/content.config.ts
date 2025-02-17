@@ -1,4 +1,14 @@
+import useSystemStore from '@/store/main/system/system';
+import { storeToRefs } from 'pinia';
+
+const systemStore = useSystemStore();
+const { user_list, total_count } = storeToRefs(systemStore);
 const contentConfig = {
+  page_name: 'user_list',
+  data: {
+    list: user_list,
+    total_count: total_count
+  },
   header: {
     title: '用户列表',
     btnTitle: '新建用户'
@@ -15,7 +25,12 @@ const contentConfig = {
     { type: 'gender', label: '性别', prop: 'gender', width: '60' },
     { type: 'enable', label: '状态', prop: 'isEnable', width: '80' },
     { type: 'operation', label: '操作' }
-  ]
+  ],
+  page: {
+    page_start: 1,
+    page_size: 20,
+    page_list: [10, 20, 30, 40]
+  }
 };
 
 export default contentConfig;

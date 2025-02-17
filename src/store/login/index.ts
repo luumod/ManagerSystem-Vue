@@ -3,7 +3,7 @@ import type { IUserAccount } from '@/types';
 import { defineStore } from 'pinia';
 import { localCache } from '@/utils/cache';
 import router from '@/router';
-import { LOGIN_TOKEN } from '@/global/constants';
+import { LOGIN_TOKEN, USER_ID, USER_INFO, USER_MENUS } from '@/global/constants';
 import { mapMenusToRoutes } from '@/utils/map-menus';
 
 interface ILoginState {
@@ -11,9 +11,6 @@ interface ILoginState {
   user_info: any;
   user_menus: any;
 }
-
-const USER_INFO = 'user_info';
-const USER_MENUS = 'user_menus';
 
 const useLoginStore = defineStore('login', {
   state: (): ILoginState => ({
@@ -49,6 +46,7 @@ const useLoginStore = defineStore('login', {
       // 个人信息本地缓存
       localCache.setCache(USER_INFO, this.user_info);
       localCache.setCache(USER_MENUS, this.user_menus);
+      localCache.setCache(USER_ID, this.user_info.id);
 
       // 添加动态路由
       const routes = mapMenusToRoutes(this.user_menus);

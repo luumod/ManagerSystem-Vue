@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(cmake_cxx_standard_required ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
-find_package(Qt6 REQUIRED COMPONENTS Core Sql HttpServer)
+find_package(Qt6 REQUIRED COMPONENTS Core Sql HttpServer Gui)
 
 file(GLOB USERPRIVILEGE_SERVER_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB USERPRIVILEGE_SERVER_HEARDERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
@@ -18,4 +18,4 @@ add_executable(${PROJECT_NAME} ${USERPRIVILEGE_SERVER_SOURCES} ${USERPRIVILEGE_S
 
 add_subdirectory(SJwt)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Sql Qt6::HttpServer SJwt)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Sql Qt6::HttpServer Qt6::Gui SJwt)

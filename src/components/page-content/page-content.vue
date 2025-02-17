@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="table">
-      <el-table :data="user_list" border style="width: 100%" @selection-change="onSelectionChange">
+      <el-table :data="listData" border style="width: 100%" @selection-change="onSelectionChange">
         <template v-for="item in props.contentConfig.propsList" :key="item.prop">
           <template v-if="item.type === 'enable'">
             <el-table-column align="center" v-bind="item">
@@ -65,7 +65,7 @@
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
-        :page-sizes="[10, 20, 30, 40]"
+        :page-sizes="props.contentConfig.page.page_list"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total_count"
         @size-change="onPageSizeChange"
@@ -77,34 +77,47 @@
 
 <script setup lang="ts" name="page-content">
 import useSystemStore from '@/store/main/system/system';
-import default_query_condition, {
-  PAGE_SIZE,
-  PAGE_START,
-  type T_queryUserData,
-  type T_userInfo
+import {
+  default_query_condition,
+  default_queryImage_condition,
+  type T_queryImageData,
+  type T_queryUserData
 } from '@/store/main/system/types';
 import { ElMessage } from 'element-plus';
-import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref, type Ref } from 'vue';
 
 interface IProps {
   contentConfig: {
+    page_name: string;
+    data: {
+      list: Ref<any[]>;
+      total_count: Ref<number>;
+    };
     header?: {
       title?: string;
       btnTitle?: string;
     };
     propsList: any[];
+    page: {
+      page_start: number;
+      page_size: number;
+      page_list: number[];
+    };
   };
 }
 
 const props = defineProps<IProps>();
 
+//构造响应式数据
+const listData = computed(() => props.contentConfig.data.list.value);
+const total_count = computed(() => props.contentConfig.data.total_count.value);
+
 //保存多选中选中的多条用户数据行
-const multipleSelection = ref<T_userInfo[]>([]);
+const multipleSelection = ref<any[]>();
 
 //数据
-const currentPage = ref(PAGE_START);
-const pageSize = ref(PAGE_SIZE);
+const currentPage = ref();
+const pageSize = ref(props.contentConfig.page.page_size);
 
 const emit = defineEmits([
   'changePage',
@@ -118,17 +131,21 @@ const emit = defineEmits([
 
 //1. 发起action，请求user_list数据
 const systemStore = useSystemStore();
-fetchUserListData();
+if (props.contentConfig.page_name == 'user_list') {
+  fetchUserListData();
+} else if (props.contentConfig.page_name == 'image_list') {
+  fetchImageListData();
+}
 
 //2. 获取响应式的对象
-const { user_list, total_count } = storeToRefs(systemStore);
+//const { user_list, total_count } = storeToRefs(systemStore);
 
 /**
  * 选中的多条用户数据行
- * @param val 选中的多条用户数据行
+ * @param val 选中的多条数据行
  */
-function onSelectionChange(users: T_userInfo[]) {
-  multipleSelection.value = users;
+function onSelectionChange(data_list: any[]) {
+  multipleSelection.value = data_list;
 }
 
 /**
@@ -154,8 +171,8 @@ function onDeleteUser(id: number) {
 }
 
 /**
- * 编辑用户
- * @param item_data 要编辑的用户的数据
+ * 编辑数据行
+ * @param item_data 要编辑的数据行
  */
 function onEditUser(item_data: any) {
   emit('editUser-click', item_data);
@@ -181,7 +198,7 @@ function onCreatedNewUser() {
  * 批量删除用户
  */
 function onBatchDeleteUsers() {
-  if (multipleSelection.value.length === 0) {
+  if (multipleSelection.value == undefined) {
     ElMessage.error('请先勾选要删除的数据行');
   } else {
     emit('batchDeleteUsers-click', multipleSelection.value);
@@ -196,6 +213,10 @@ function fetchUserListData(queryInfo: T_queryUserData = default_query_condition)
   systemStore.getUserListAction(queryInfo);
 }
 
+function fetchImageListData(queryInfo: T_queryImageData = default_queryImage_condition) {
+  systemStore.getImageListAction(queryInfo);
+}
+
 /**
  * 发送网络请求：删除用户
  * @param id 要删除的用户的id
@@ -205,6 +226,10 @@ function fetchDeleteUser(id: number, queryInfo: T_queryUserData) {
   systemStore.deleteUsersAction(id, queryInfo);
 }
 
+function fetchDeleteImage(id: number, queryInfo: T_queryImageData) {
+  systemStore.deleteImageAction(id, queryInfo);
+}
+
 /**
  * 发送网络请求：批量删除用户
  * @param ids 要删除的用户的id数组
@@ -212,6 +237,9 @@ function fetchDeleteUser(id: number, queryInfo: T_queryUserData) {
  */
 function fetchBatchDeleteUsers(ids: number[], queryInfo: T_queryUserData) {
   systemStore.batchDeleteUserAction(ids, queryInfo);
+}
+function fetchBatchDeleteImages(ids: number[], queryInfo: T_queryImageData) {
+  systemStore.batchDeleteImageAction(ids, queryInfo);
 }
 
 /**
@@ -223,7 +251,17 @@ function fetchUpdateUser(item_data: any, queryInfo: T_queryUserData) {
   systemStore.updateUserAction(item_data.id, { isEnable: item_data.isEnable }, queryInfo);
 }
 
-defineExpose({ fetchUserListData, fetchDeleteUser, fetchUpdateUser, fetchBatchDeleteUsers });
+defineExpose({
+  tableData: props.contentConfig.data.list.value,
+  fetchUserListData,
+  fetchDeleteUser,
+  fetchUpdateUser,
+  fetchBatchDeleteUsers,
+
+  fetchImageListData,
+  fetchDeleteImage,
+  fetchBatchDeleteImages
+});
 </script>
 
 <style scoped>

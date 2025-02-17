@@ -25,6 +25,11 @@ private:
 	void route_managerUserSystem();
 
 	/**
+	* 图片管理
+	*/
+	void route_imageManagement();
+
+	/**
 	* 高级查询：
 	* 菜单管理
 	*/

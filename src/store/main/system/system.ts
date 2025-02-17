@@ -1,8 +1,11 @@
 import {
+  batchDeleteImageData,
   batchDeleteUserData,
   checkUserAccount,
   createNewUser,
+  deleteImageData,
   deleteUserData,
+  getImageListByIdData,
   getUserListData,
   updateUserData
 } from '@/service/main/system/system';
@@ -11,16 +14,25 @@ import type {
   T_userSystemState,
   T_queryUserData,
   T_createUserParams,
-  T_updateUserInfo
+  T_updateUserInfo,
+  T_queryImageData
 } from './types';
-import default_query_condition from './types';
+import { default_query_condition, default_queryImage_condition } from './types';
+import { localCache } from '@/utils/cache';
+import { USER_ID } from '@/global/constants';
 
 const useSystemStore = defineStore('system', {
   state: (): T_userSystemState => ({
     user_list: [],
-    total_count: 0
+    total_count: 0,
+
+    image_list_byID: [],
+    total_image_count_byID: 0
   }),
   actions: {
+    /***
+     * 用户列表操作
+     */
     async getUserListAction(queryInfo: T_queryUserData = default_query_condition) {
       await getUserListData(queryInfo).then((user_list) => {
         const { total_records, list } = user_list.data;
@@ -74,6 +86,37 @@ const useSystemStore = defineStore('system', {
       if (user) {
         user.avatar_path = newAvatarUrl;
       }
+    },
+
+    /***
+     * 图片列表操作
+     * @param queryInfo 查询条件
+     */
+    async getImageListAction(
+      queryInfo: T_queryImageData = default_queryImage_condition,
+      owner_id: string = localCache.getCache(USER_ID)
+    ) {
+      await getImageListByIdData(owner_id, queryInfo).then((image_list_byID) => {
+        const { total_records, images } = image_list_byID.data;
+        this.image_list_byID = images;
+        this.total_image_count_byID = total_records;
+        console.log(this.image_list_byID);
+        console.log(this.total_image_count_byID);
+      });
+    },
+    async deleteImageAction(id: number, queryInfo: T_queryImageData) {
+      //1. 删除数据
+      await deleteImageData(id).then(() => {
+        //2. 更新列表
+        this.getImageListAction(queryInfo);
+      });
+    },
+    async batchDeleteImageAction(ids: number[], queryInfo: T_queryImageData) {
+      //1. 批量删除
+      await batchDeleteImageData(ids).then(() => {
+        //2. 更新列表
+        this.getImageListAction(queryInfo);
+      });
     }
   }
 });

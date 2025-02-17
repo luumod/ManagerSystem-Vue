@@ -2,7 +2,8 @@ import hyRequest from '@/service';
 import type {
   T_createUserParams,
   T_queryUserData,
-  T_updateUserInfo
+  T_updateUserInfo,
+  T_queryImageData
 } from '@/store/main/system/types';
 
 /**
@@ -59,5 +60,33 @@ export function updateUserData(id: number, user_params: T_updateUserInfo) {
   return hyRequest.patch({
     url: `/user/${id}`,
     data: user_params
+  });
+}
+
+//图片相关接口
+export function getImageListByIdData(owner_id: string, queryInfo: T_queryImageData) {
+  return hyRequest.post({
+    url: `/image/list/${owner_id}`,
+    data: queryInfo
+  });
+}
+
+export function uploadImageListByIdData(owner_id: string, queryInfo: T_queryImageData) {
+  return hyRequest.post({
+    url: `/image/list/${owner_id}`,
+    data: queryInfo
+  });
+}
+
+export function deleteImageData(id: number) {
+  return hyRequest.delete({
+    url: `/image/${id}`
+  });
+}
+
+export function batchDeleteImageData(ids: number[]) {
+  return hyRequest.delete({
+    url: `/images`,
+    data: { lists: ids }
   });
 }
