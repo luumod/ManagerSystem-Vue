@@ -19,7 +19,7 @@
       @changeEnableUser-click="onClickedChanegeEnableUser"
     >
     </page-content>
-    <user-modal ref="modalRef"> </user-modal>
+    <page-created ref="modalRef" :created-config="createdConfig"></page-created>
     <page-modalEdit ref="modalEditRef" :modal-edit-config="modalEditConfig"></page-modalEdit>
   </div>
 </template>
@@ -28,12 +28,13 @@
 import contentConfig from './config/content.config';
 import searchConfig from './config/search.config';
 import modalEditConfig from './config/modalEdit.config';
+import createdConfig from './config/created.config';
 import PageSearch from '@/components/page-search/page-search.vue';
 import PageContent from '@/components/page-content/page-content.vue';
 import PageModalEdit from '@/components/page-edit/page-modalEdit.vue';
+import PageCreated from '@/components/page-created/page-created.vue';
 
-import UserModal from './c-cpns/user-modal.vue';
-import usePageSearch from '@/hooks/usePageSearch';
+  import usePageSearch from '@/hooks/usePageSearch';
 import usePageContent from '@/hooks/usePageContent';
 import { default_query_condition, type T_queryUserData } from '@/store/main/system/types';
 import { ref } from 'vue';

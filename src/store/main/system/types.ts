@@ -5,9 +5,20 @@ export interface T_createUserParams {
   user_account: string;
   user_name: string;
   gender: number;
+  isEnable?: number;
   mobile: string;
   email: string;
   password: string;
+}
+
+/**
+ * 上传图片时，所需要的参数
+ */
+export interface T_uploadImageParams {
+  image_type: string;
+  description: string;
+  image_share: number;
+  image_download: number;
 }
 
 /**

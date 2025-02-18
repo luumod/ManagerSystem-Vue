@@ -4,7 +4,7 @@ import type {
   T_queryUserData,
   T_updateUserInfo,
   T_queryImageData,
-  T_updateImageInfo
+  T_uploadImageParams
 } from '@/store/main/system/types';
 
 /**
@@ -44,10 +44,13 @@ export function batchDeleteUserData(ids: number[]) {
  * @returns Promise<any>
  * @error 【会抛出错误】：用户已经存在
  */
-export function createNewUser(new_user_params: T_createUserParams) {
+export function createNewUser(new_user_params: T_createUserParams, file: File) {
+  const formData = new FormData();
+  formData.append('upload_avatar', file);
   return hyRequest.post({
     url: `/user/create`,
-    data: new_user_params
+    params: new_user_params,
+    data: formData
   });
 }
 
@@ -79,10 +82,14 @@ export function getImageListData(queryInfo: T_queryImageData) {
   });
 }
 
-export function uploadImageListByIdData(owner_id: string, queryInfo: T_queryImageData) {
+export function createNewImage(image_params: T_uploadImageParams, file: File) {
+  const formData = new FormData();
+  formData.append('upload_image', file); // 'file' 需与后端解析的字段名匹配
+
   return hyRequest.post({
-    url: `/image/list/${owner_id}`,
-    data: queryInfo
+    url: `/image/upload`,
+    params: image_params,
+    data: formData
   });
 }
 
@@ -96,12 +103,5 @@ export function batchDeleteImageData(ids: number[]) {
   return hyRequest.delete({
     url: `/images`,
     data: { lists: ids }
-  });
-}
-
-export function updateImageData(id: number, image_params: T_updateImageInfo) {
-  return hyRequest.patch({
-    url: `/image/${id}`,
-    data: image_params
   });
 }

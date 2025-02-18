@@ -1,9 +1,9 @@
 <template>
-  <div class="user-modal-edit">
+  <div class="user-modal">
     <el-dialog
       v-model="dialogVisible"
-      :title="props.modalEditConfig.pageName"
-      :width="props.modalEditConfig.dialogWidth ?? '50%'"
+      :title="props.createdConfig.pageName"
+      :width="props.createdConfig.dialogWidth ?? '75%'"
       center
     >
       <div class="form">
@@ -11,28 +11,26 @@
           :model="formData"
           ref="formRef"
           status-icon
-          :label-width="props.modalEditConfig.labelWidth ?? '80px'"
+          :label-width="props.createdConfig.labelWidth ?? '80px'"
         >
           <el-row>
             <!-- 左侧图片区域 -->
             <el-col :span="8">
               <div class="left-panel">
-                <template v-for="item in props.modalEditConfig.formItems" :key="item.prop">
+                <template v-for="item in props.createdConfig.formItems" :key="item.prop">
                   <!-- 头像区域 -->
                   <template v-if="item.type === 'avatar'">
                     <div class="avatar-wrapper" style="margin-bottom: 20px">
-                      <el-avatar :size="130" :src="imageUrl" fit="cover" />
                       <el-upload
-                        class="upload-btn"
+                        class="avatar-uploader"
                         :action="uploadUrl"
                         :headers="{ Authorization: `Bearer ${localCache.getCache(LOGIN_TOKEN)}` }"
                         :auto-upload="true"
-                        :show-file-list="false"
-                        :on-success="handleAvatarSuccess"
+                        :show-file-list="true"
+                        :on-success="handleUploadSuccess"
                       >
-                        <el-button type="primary" plain>
-                          <el-icon><Upload /></el-icon>更换头像
-                        </el-button>
+                        <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                        <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                       </el-upload>
                     </div>
                   </template>
@@ -40,12 +38,17 @@
                   <!-- 图片区域 -->
                   <template v-if="item.type === 'image'">
                     <div class="image-wrapper">
-                      <el-image
-                        style="width: 100%; max-height: 200px"
-                        :src="imageUrl"
-                        fit="contain"
-                        :preview-src-list="[imageUrl]"
-                      />
+                      <el-upload
+                        class="avatar-uploader"
+                        :action="uploadUrl"
+                        :headers="{ Authorization: `Bearer ${localCache.getCache(LOGIN_TOKEN)}` }"
+                        :auto-upload="true"
+                        :show-file-list="true"
+                        :on-success="handleUploadSuccess"
+                      >
+                        <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                        <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+                      </el-upload>
                     </div>
                   </template>
                 </template>
@@ -55,7 +58,7 @@
             <!-- 右侧表单区域 -->
             <el-col :span="16">
               <div class="right-panel">
-                <template v-for="item in props.modalEditConfig.formItems" :key="item.prop">
+                <template v-for="item in props.createdConfig.formItems" :key="item.prop">
                   <template v-if="!['avatar', 'image'].includes(item.type)">
                     <el-form-item :label="item.label" :prop="item.prop">
                       <!-- 输入型组件 -->
@@ -101,7 +104,6 @@
           </el-row>
         </el-form>
       </div>
-
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmit">确定</el-button>
@@ -110,7 +112,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="user-modal-edit-edit">
+<script setup lang="ts" name="user-modal">
 import { LOGIN_TOKEN } from '@/global/constants';
 import { BASE_URL } from '@/service/config';
 import useSystemStore from '@/store/main/system/system';
@@ -120,7 +122,7 @@ import { ElForm, ElMessage } from 'element-plus';
 import { reactive, ref } from 'vue';
 
 interface IProps {
-  modalEditConfig: {
+  createdConfig: {
     pageType: T_pageType;
     dialogWidth?: string;
     pageName: string;
@@ -132,122 +134,118 @@ interface IProps {
 const props = defineProps<IProps>();
 
 const initialForm: any = {};
-for (const item of props.modalEditConfig.formItems) {
+for (const item of props.createdConfig.formItems) {
   initialForm[item.prop] = item.initialValue ?? '';
 }
 const formData = reactive(initialForm);
-const page_type = ref(props.modalEditConfig.pageType);
+const page = props.createdConfig.pageType;
+
+const file_data = ref<File>();
+const imageUrl = ref('');
+const uploadUrl = ref('');
+
 const dialogVisible = ref(false);
 const systemStore = useSystemStore();
 
-/**
- * 当前正在编辑的数据行id
- */
-const edit_id = ref<number>();
+// const validateAccount = (rule: any, value: string, callback: any) => {
+//   if (!value) {
+//     return callback(new Error('请输入账号！'));
+//   }
 
-/**
- * 获取表单实例：用于重置表单数据
- */
+//   if (!/^[a-zA-Z0-9]{6,20}$/.test(value)) {
+//     return callback(new Error('账号长度必须为6-20位字母或数字！'));
+//   }
+
+//   systemStore
+//     .checkUserAccountAction(value)
+//     .then(() => {
+//       callback();
+//     })
+//     .catch((error: any) => {
+//       callback(new Error(error.message));
+//     });
+// };
+
+// //校验规则
+// const accountRules: FormRules = {
+//   user_account: [{ validator: validateAccount, trigger: 'blur' }],
+//   user_name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+//   password: [
+//     { required: true, message: '请输入密码', trigger: 'blur' },
+//     { pattern: /^[a-zA-Z0-9]{6,20}$/, message: '密码长度必须在6-20位之间', trigger: 'blur' }
+//   ],
+//   mobile: [
+//     { required: true, message: '请输入手机号码', trigger: 'blur' },
+//     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+//   ],
+//   email: [
+//     { required: true, message: '请输入邮箱', trigger: 'blur' },
+//     { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
+//   ]
+// };
+
 const formRef = ref<InstanceType<typeof ElForm>>();
 
-/**
- * 上传头像的 URL：http://localhost:8888/user/${edit_id}/avatar
- * @usage 【el-upload】的 action 属性
- */
-const uploadUrl = ref('');
-
-const file_data = ref<File>();
-
-/**
- * 显示用户头像的 URL：http://localhost:8888/user/${edit_id}/avatar?token=${token}&t=${Date.now()}
- * @usage 【el-avatar】的img属性
- */
-const imageUrl = ref('');
-
-//查询条件
-const queryCondition = ref();
-
-/**
- * 显示修改用户弹窗，并且显示用户基本信息，在查询中修改时，可以保持查询条件不变
- * @param item_data 填充的用户信息
- * @param qc 查询条件
- */
-async function showUpdateUserDlg(item_data: any, qc: any) {
-  //1. 加载查询条件
-  queryCondition.value = qc;
-  //2. 显示当前弹窗
+function showCreatedNewUserDlg() {
   dialogVisible.value = true;
-  //3. 保存要修改的用户的id
-  edit_id.value = item_data.id; //保存要修改的这一行的id
-  //4. 填充表单数据
-  Object.assign(formData, item_data);
 
-  //上传操作（占位）：为了在el-upload中显示出选择的图片
-  uploadUrl.value = BASE_URL + `/fake_upload`;
+  uploadUrl.value = BASE_URL + `/fake_upload`; //占位
+}
 
-  //显示【图片/头像】：
-  const res_url = item_data.avatar_path ? item_data.avatar_path : item_data.image_path;
-  imageUrl.value = `${BASE_URL}${res_url}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
+function handleUploadSuccess(response: any, uploadFile: any) {
+  //主要是获取uploadFile
+  if (response.code === 0) {
+    //raw就是File对象
+    imageUrl.value = URL.createObjectURL(uploadFile.raw!);
+    file_data.value = uploadFile.raw!;
+    //name: 文件名，在上传图片中用到，上传头像无需用到
+  }
 }
 
 /**
- * 上传图片成功后的回调函数
- * @param response 从服务器返回的响应数据
- */
-function handleAvatarSuccess(response: any, uploadFile: any) {
-  debugger;
-  //1. 获取新的头像的url（在服务器的相对路径）
-  const newAvatarUrl = response.data.url;
-
-  //2. 更新表单中的头像路径，同时更新 Store 中存储的用户头像数据
-  formData.avatar_path = newAvatarUrl;
-  systemStore.updateUserAvatar(edit_id.value!, newAvatarUrl);
-
-  file_data.value = uploadFile.raw!;
-
-  //3. 实时更新头像在el-avatar中的显示
-  imageUrl.value = `${BASE_URL}${newAvatarUrl}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
-  //imageUrl.value = URL.createObjectURL(uploadFile.raw!);
-}
-
-/**
- * 点击了【确定】，发送请求，修改用户信息
+ * 点击了【新建】，发送请求，新建一个用户
  */
 function handleSubmit() {
-  if (page_type.value === T_pageType.PAGE_USER) {
+  if (page === T_pageType.PAGE_USER) {
     //1. 发送请求
     systemStore
-      .updateUserAction(edit_id.value!, formData, queryCondition.value)
+      .createNewUserAction(formData, file_data.value!)
       .then(() => {
-        //systemStore.uploadUserAvatarAction(edit_id.value!, file_data.value!);
         //2. 显示成功提示
-        ElMessage.success('修改用户信息成功！');
+        ElMessage.success('新建用户成功！');
 
-        //3. 刷新列表
+        //3. 关闭弹窗
+        dialogVisible.value = false;
+
+        //4. 刷新列表
         formRef.value?.resetFields();
       })
       .catch((error: any) => {
-        ElMessage.info(error.message);
+        //1. 显示失败提示
+        ElMessage.error(error.message);
       });
-  } else if (page_type.value === T_pageType.PAGE_IMAGE) {
-    // systemStore
-    //   .updateImageAction(edit_id.value!, formData, queryCondition.value)
-    //   .then(() => {
-    //     systemStore.uploadImageAction(edit_id.value!, file_data.value!);
-    //     //2. 显示成功提示
-    //     ElMessage.success('修改图片信息成功！');
-    //     //3. 刷新列表
-    //     formRef.value?.resetFields();
-    //   })
-    //   .catch((error: any) => {
-    //     ElMessage.info(error.message);
-    //   });
-  }
+  } else if (page === T_pageType.PAGE_IMAGE) {
+    //1. 发送请求
+    systemStore
+      .createNewImageAction(formData, file_data.value!)
+      .then(() => {
+        //2. 显示成功提示
+        ElMessage.success('新建图片成功！');
 
-  dialogVisible.value = false;
+        //3. 关闭弹窗
+        dialogVisible.value = false;
+
+        //4. 刷新列表
+        formRef.value?.resetFields();
+      })
+      .catch((error: any) => {
+        //1. 显示失败提示
+        ElMessage.error(error.message);
+      });
+  }
 }
 
-defineExpose({ showUpdateUserDlg });
+defineExpose({ showCreatedNewUserDlg });
 </script>
 
 <style scoped lang="less">
@@ -260,6 +258,7 @@ defineExpose({ showUpdateUserDlg });
       box-shadow: 0 0 0 1px rgb(255, 33, 33) inset;
     }
   }
+
   .avatar-item {
     display: flex;
     align-items: center;
@@ -271,6 +270,21 @@ defineExpose({ showUpdateUserDlg });
     height: 150px;
   }
 }
+
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+
 .left-panel {
   display: flex;
   flex-direction: column;

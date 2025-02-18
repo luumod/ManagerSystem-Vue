@@ -1,7 +1,7 @@
 import type PageContent from '@/components/page-content/page-content.vue';
 import type { T_queryImageData, T_queryUserData, T_userInfo } from '@/store/main/system/types';
 import type UserModalEdit from '@/components/page-edit/page-modalEdit.vue';
-import type UserModal from '@/views/main/system/user/c-cpns/user-modal.vue';
+import type UserCreated from '@/components/page-created/page-created.vue';
 import { ref, type Ref } from 'vue';
 
 /**
@@ -21,7 +21,7 @@ import { ref, type Ref } from 'vue';
 function usePageContent(conditionRef: Ref<any>) {
   const contentRef = ref<InstanceType<typeof PageContent>>();
   const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
-  const modalRef = ref<InstanceType<typeof UserModal>>();
+  const modalRef = ref<InstanceType<typeof UserCreated>>();
 
   type FetchListMethods = {
     fetchUserListData: T_queryUserData;
@@ -113,17 +113,16 @@ function usePageContent(conditionRef: Ref<any>) {
   }
 
   /**
-   * 点击新增按钮：显示新增用户的弹窗
+   * 点击新增按钮：显示新增数据行的弹窗
    */
   function onClickedCreatedNewUser() {
-    modalRef.value?.setDlgVisible(true);
+    modalRef.value?.showCreatedNewUserDlg();
   }
 
   return {
     contentRef,
     modalEditRef,
     modalRef,
-    //conditionRef,
     createPageChanger,
     createPageSizeChanger,
     createOnClickedDeleteChanger,

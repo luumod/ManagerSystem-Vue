@@ -3,12 +3,12 @@ import {
   batchDeleteImageData,
   batchDeleteUserData,
   checkUserAccount,
+  createNewImage,
   createNewUser,
   deleteImageData,
   deleteUserData,
   getImageListData,
   getUserListData,
-  updateImageData,
   updateUserData
 } from '@/service/main/system/system';
 import { defineStore } from 'pinia';
@@ -18,12 +18,14 @@ import type {
   T_createUserParams,
   T_updateUserInfo,
   T_queryImageData,
-  T_updateImageInfo
+  T_updateImageInfo,
+  T_uploadImageParams
 } from './types';
 import { default_query_condition, default_queryImage_condition } from './types';
 import { localCache } from '@/utils/cache';
 import { USER_ID } from '@/global/constants';
 import { ElMessage } from 'element-plus';
+import { id } from 'element-plus/es/locales.mjs';
 
 const useSystemStore = defineStore('system', {
   state: (): T_userSystemState => ({
@@ -62,14 +64,13 @@ const useSystemStore = defineStore('system', {
         this.getUserListAction(queryInfo);
       });
     },
-    async createNewUserAction(new_user_params: T_createUserParams) {
-      await createNewUser(new_user_params)
-        .then(() => {
-          this.getUserListAction();
-        })
-        .catch((error) => {
-          throw error; //用户已经存在
-        });
+    async createNewUserAction(new_user_params: T_createUserParams, file: File) {
+      try {
+        await createNewUser(new_user_params, file);
+        this.getUserListAction();
+      } catch (error) {
+        throw error;
+      }
     },
     async updateUserAction(
       id: number,
@@ -111,6 +112,14 @@ const useSystemStore = defineStore('system', {
         this.total_image_count_byID = total_records;
       });
     },
+    async createNewImageAction(new_image_params: T_uploadImageParams, file: File) {
+      try {
+        await createNewImage(new_image_params, file);
+        this.getImageListAction();
+      } catch (error) {
+        throw error;
+      }
+    },
     async deleteImageAction(id: number, queryInfo: T_queryImageData) {
       //1. 删除数据
       await deleteImageData(id).then(() => {
@@ -125,15 +134,6 @@ const useSystemStore = defineStore('system', {
         this.getImageListAction(queryInfo);
       });
     },
-    async updateImageAction(
-      id: number,
-      update_image_params: T_updateImageInfo | any,
-      queryInfo: T_queryImageData = default_queryImage_condition
-    ) {
-      await updateImageData(id, update_image_params).then(() => {
-        this.getImageListAction(queryInfo);
-      });
-    }
   }
 });
 

@@ -9,6 +9,7 @@
       @deleteUser-click="onClickedDelete"
       @batchDeleteUsers-click="onClickedBatchDelete"
       @editUser-click="onClickedEditUser"
+      @createdNewUser-click="onClickedCreatedNewUser"
     >
       <!-- 自定义图片显示 -->
       <template v-slot:image_path="scope">
@@ -36,6 +37,7 @@
         </span>
       </template>
     </page-content>
+    <page-created ref="modalRef" :created-config="createdConfig"> </page-created>
     <page-modalEdit ref="modalEditRef" :modal-edit-config="modalEditConfig"></page-modalEdit>
   </div>
 </template>
@@ -44,10 +46,13 @@
 import pageSearch from '@/components/page-search/page-search.vue';
 import pageContent from '@/components/page-content/page-content.vue';
 import PageModalEdit from '@/components/page-edit/page-modalEdit.vue';
+import PageCreated from '@/components/page-created/page-created.vue';
 
 import contentConfig from './config/content.config';
 import searchConfig from './config/search.config';
 import modalEditConfig from './config/modalEdit.config';
+import createdConfig from './config/created.config';
+
 import usePageContent from '@/hooks/usePageContent';
 import { BASE_URL } from '@/service/config';
 import { ref } from 'vue';
@@ -59,16 +64,14 @@ import { LOGIN_TOKEN } from '@/global/constants';
 const imageCondition = ref<T_queryImageData>({ ...default_queryImage_condition });
 const {
   contentRef,
-  // modalRef,
+  modalRef,
   modalEditRef,
-  //conditionRef,
   createPageChanger,
   createPageSizeChanger,
   createOnClickedDeleteChanger,
   createOnClickedBatchDeleteChanger,
-  // onClickedChanegeEnableUser,
-  onClickedEditUser
-  // onClickedCreatedNewUser
+  onClickedEditUser,
+  onClickedCreatedNewUser
 } = usePageContent(imageCondition);
 
 const onChangePage = createPageChanger({
