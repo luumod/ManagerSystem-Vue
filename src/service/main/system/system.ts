@@ -3,7 +3,8 @@ import type {
   T_createUserParams,
   T_queryUserData,
   T_updateUserInfo,
-  T_queryImageData
+  T_queryImageData,
+  T_updateImageInfo
 } from '@/store/main/system/types';
 
 /**
@@ -71,6 +72,13 @@ export function getImageListByIdData(owner_id: string, queryInfo: T_queryImageDa
   });
 }
 
+export function getImageListData(queryInfo: T_queryImageData) {
+  return hyRequest.post({
+    url: `/image/list`,
+    data: queryInfo
+  });
+}
+
 export function uploadImageListByIdData(owner_id: string, queryInfo: T_queryImageData) {
   return hyRequest.post({
     url: `/image/list/${owner_id}`,
@@ -88,5 +96,12 @@ export function batchDeleteImageData(ids: number[]) {
   return hyRequest.delete({
     url: `/images`,
     data: { lists: ids }
+  });
+}
+
+export function updateImageData(id: number, image_params: T_updateImageInfo) {
+  return hyRequest.patch({
+    url: `/image/${id}`,
+    data: image_params
   });
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   batchDeleteImageData,
   batchDeleteUserData,
@@ -5,8 +6,9 @@ import {
   createNewUser,
   deleteImageData,
   deleteUserData,
-  getImageListByIdData,
+  getImageListData,
   getUserListData,
+  updateImageData,
   updateUserData
 } from '@/service/main/system/system';
 import { defineStore } from 'pinia';
@@ -15,11 +17,13 @@ import type {
   T_queryUserData,
   T_createUserParams,
   T_updateUserInfo,
-  T_queryImageData
+  T_queryImageData,
+  T_updateImageInfo
 } from './types';
 import { default_query_condition, default_queryImage_condition } from './types';
 import { localCache } from '@/utils/cache';
 import { USER_ID } from '@/global/constants';
+import { ElMessage } from 'element-plus';
 
 const useSystemStore = defineStore('system', {
   state: (): T_userSystemState => ({
@@ -34,11 +38,15 @@ const useSystemStore = defineStore('system', {
      * 用户列表操作
      */
     async getUserListAction(queryInfo: T_queryUserData = default_query_condition) {
-      await getUserListData(queryInfo).then((user_list) => {
-        const { total_records, list } = user_list.data;
-        this.user_list = list;
-        this.total_count = total_records;
-      });
+      await getUserListData(queryInfo)
+        .then((user_list) => {
+          const { total_records, list } = user_list.data;
+          this.user_list = list;
+          this.total_count = total_records;
+        })
+        .catch((error) => {
+          ElMessage.info(error.message);
+        });
     },
     async deleteUsersAction(id: number, queryInfo: T_queryUserData) {
       //1. 删除数据
@@ -96,12 +104,11 @@ const useSystemStore = defineStore('system', {
       queryInfo: T_queryImageData = default_queryImage_condition,
       owner_id: string = localCache.getCache(USER_ID)
     ) {
-      await getImageListByIdData(owner_id, queryInfo).then((image_list_byID) => {
+      await getImageListData(queryInfo).then((image_list_byID) => {
+        console.log(image_list_byID);
         const { total_records, images } = image_list_byID.data;
         this.image_list_byID = images;
         this.total_image_count_byID = total_records;
-        console.log(this.image_list_byID);
-        console.log(this.total_image_count_byID);
       });
     },
     async deleteImageAction(id: number, queryInfo: T_queryImageData) {
@@ -115,6 +122,15 @@ const useSystemStore = defineStore('system', {
       //1. 批量删除
       await batchDeleteImageData(ids).then(() => {
         //2. 更新列表
+        this.getImageListAction(queryInfo);
+      });
+    },
+    async updateImageAction(
+      id: number,
+      update_image_params: T_updateImageInfo | any,
+      queryInfo: T_queryImageData = default_queryImage_condition
+    ) {
+      await updateImageData(id, update_image_params).then(() => {
         this.getImageListAction(queryInfo);
       });
     }

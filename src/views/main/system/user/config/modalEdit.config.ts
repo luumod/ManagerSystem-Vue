@@ -1,4 +1,7 @@
+import { T_pageType } from '@/store/main/system/types';
+
 const modalEditConfig = {
+  pageType: T_pageType.PAGE_USER,
   dialogWidth: '50%',
   pageName: '编辑用户信息',
   labelWidth: 100,

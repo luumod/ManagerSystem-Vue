@@ -24,6 +24,17 @@ export interface T_updateUserInfo {
 }
 
 /**
+ * 修改图片时，所需要的参数
+ */
+export interface T_updateImageInfo {
+  description: string;
+  image_download: number;
+  image_name: string;
+  image_share: number;
+  image_type: string;
+}
+
+/**
  * 一个用户的全部信息
  */
 export interface T_userInfo {
@@ -56,6 +67,7 @@ export interface T_imageInfo {
   image_size: number;
   image_type: string;
   owner_id: number;
+  owner_name: string;
   upload_time: string;
 }
 
@@ -117,3 +129,8 @@ const default_queryImage_condition: T_queryImageData = {
 };
 
 export { default_query_condition, default_queryImage_condition };
+
+export enum T_pageType {
+  PAGE_USER,
+  PAGE_IMAGE
+}

@@ -982,6 +982,7 @@ void Server::route_imageManagement()
 			QJsonObject jobj;
 			jobj.insert("id", id);
 			jobj.insert("owner_id", query.value("owner_id").toInt());
+			jobj.insert("owner_name", query.value("owner_name").toString());
 			jobj.insert("image_path", query.value("image_path").toString());
 			jobj.insert("image_name", query.value("image_name").toString());
 			jobj.insert("image_size", query.value("image_size").toInt());
@@ -995,11 +996,6 @@ void Server::route_imageManagement()
 			jarray.append(jobj);
 		}
 
-		if (jarray.isEmpty()) {
-			resSuccess(SResult::success(SResultCode::SuccessButNoData), responder);
-			return;
-		}
-
 		QJsonObject jobj;
 		jobj.insert("images", jarray);
 		jobj.insert("cur_page", page);
@@ -1008,6 +1004,111 @@ void Server::route_imageManagement()
 		jobj.insert("total_records", total_records);
 		resSuccess(SResult::success(jobj), responder);
 		return;
+		});
+
+	//用户图片获取：全部图片
+	m_server.route("/image/list", QHttpServerRequest::Method::Post,
+		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+			CheckJsonParse(request, responder);
+
+			//校验参数
+			std::optional<QByteArray> token = CheckToken(request);
+			if (token.has_value()) { //token校验失败
+				resError(token.value(), responder);
+				return;
+			}
+
+			auto page = jdom["page"].toInt();
+			auto pageSize = jdom["pageSize"].toInt();
+			auto image_name = jdom["image_name"].toString();
+			auto image_type = jdom["image_type"].toString();
+			auto image_format = jdom["image_format"].toString();
+			auto image_share = jdom["image_share"].toVariant().toInt();
+			auto image_download = jdom["image_download"].toVariant().toInt();
+			QString filter = "";
+			if (!image_name.isEmpty()) {
+				filter += QString(" AND image_name LIKE '%%1%'").arg(image_name);
+			}
+			if (!image_type.isEmpty()) {
+				filter += QString(" AND image_type LIKE '%%1%'").arg(image_type);
+			}
+			if (!image_format.isEmpty()) {
+				filter += QString(" AND image_format LIKE '%%1%'").arg(image_format);
+			}
+			if (image_share) {
+				//'图片共享方式（1 共有，2 私有，3授权 ...）',
+				filter += QString(" AND image_share=%1").arg(image_share);
+			}
+			if (image_download) {
+				//'图片是否允许下载 1是，2 否，3授权',
+				filter += QString(" AND image_download=%1").arg(image_download);
+			}
+
+			if (pageSize == 0) {
+				pageSize = 6;
+			}
+
+			//确保筛选后能得到正确的页数信息
+			SSqlConnectionWrap wrap;
+			QSqlQuery query(wrap.openConnection());
+			query.prepare(QString("SELECT COUNT(*) as total FROM user_image where isDeleted=0 %2").arg(filter));
+			if (!query.exec()) {
+				resError(SResult::error(SResultCode::ServerSqlQueryError), responder);
+				return;
+			}
+#if _DEBUG	
+			qDebug() << "指定用户图片列表获取";
+			qDebug() << query.lastQuery();
+#endif
+
+			query.next();
+			auto total_records = query.value("total").toInt(); //图片总数
+			auto last_page = total_records / pageSize + (total_records % pageSize ? 1 : 0);
+			if (page < 1 || page > last_page) {
+				page = 1;
+			}
+
+			//图片列表获取
+			QString sql = QString("SELECT * FROM user_image WHERE isDeleted=0 %2").arg(filter);
+			sql += QString(" LIMIT %1,%2").arg((page - 1) * pageSize).arg(pageSize);
+			query.prepare(sql);
+			if (!query.exec()) {
+				resError(SResult::error(SResultCode::ServerSqlQueryError), responder);
+				return;
+			}
+#if _DEBUG	
+			qDebug() << query.lastQuery();
+#endif
+
+			QJsonArray jarray;
+			int i = 0;
+			while (query.next()) {
+				auto id = query.value("id").toInt(); //获取每张图片id
+				QJsonObject jobj;
+				jobj.insert("id", id);
+				jobj.insert("owner_id", query.value("owner_id").toInt());
+				jobj.insert("owner_name", query.value("owner_name").toString());
+				jobj.insert("image_path", query.value("image_path").toString());
+				jobj.insert("image_name", query.value("image_name").toString());
+				jobj.insert("image_size", query.value("image_size").toInt());
+				jobj.insert("image_format", query.value("image_format").toString());
+				jobj.insert("image_share", query.value("image_share").toInt());
+				jobj.insert("image_type", query.value("image_type").toString());
+				jobj.insert("image_download", query.value("image_download").toInt());
+				jobj.insert("image_ResolutionRatio", query.value("image_ResolutionRatio").toString());
+				jobj.insert("upload_time", query.value("upload_time").toString());
+				jobj.insert("description", query.value("description").toString());
+				jarray.append(jobj);
+			}
+
+			QJsonObject jobj;
+			jobj.insert("images", jarray);
+			jobj.insert("cur_page", page);
+			jobj.insert("page_size", pageSize);
+			jobj.insert("last_page", last_page);
+			jobj.insert("total_records", total_records);
+			resSuccess(SResult::success(jobj), responder);
+			return;
 		});
 
 
@@ -1056,8 +1157,13 @@ void Server::route_imageManagement()
 		//把路径写入数据库
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
-		query.prepare(QString("INSERT IGNORE INTO user_image(owner_id,image_name,image_type,upload_time,description,image_format,image_share,image_download) \
-		VALUES (%1,'%2','%3','%4','%5','%6',%7,%8)")
+		query.prepare(QString("select user_name from user_info where id=%1").arg(u_id));
+		query.exec();
+		CheckSqlQuery(query,responder);
+		query.next();
+		auto owner_name = query.value("user_name").toString();
+		query.prepare(QString("INSERT IGNORE INTO user_image(owner_id,image_name,image_type,upload_time,description,image_format,image_share,image_download,owner_name) \
+		VALUES (%1,'%2','%3','%4','%5','%6',%7,%8,'%9')")
 			.arg(u_id)
 			.arg(QFileInfo(parse.filename()).baseName())
 			.arg(image_type)
@@ -1066,7 +1172,8 @@ void Server::route_imageManagement()
 			.arg(QFileInfo(parse.filename()).suffix())
 			.arg(image_share)
 			.arg(image_download)
-			
+			.arg(owner_name)
+			.arg(owner_name)
 		);
 		query.exec();
 #if _DEBUG
@@ -1228,6 +1335,76 @@ void Server::route_imageManagement()
 
 			resSuccess(SResult::success(), responder);
 			return;
+		});
+
+
+	//图片修改
+	m_server.route("/image/<arg>", QHttpServerRequest::Method::Patch,
+		[](const QString& id,const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+		CheckJsonParse(request, responder);
+
+		//校验参数
+		std::optional<QByteArray> token = CheckToken(request);
+		if (token.has_value()) { //token校验失败
+			resError(token.value(), responder);
+			return;
+		}
+		CheckIsInt(id,responder);
+
+		//既然能修改图片，那么图片一定是存在的
+		auto image_name = jdom["image_name"].toString();
+		auto image_type = jdom["image_type"].toString();
+		auto image_share = jdom["image_share"].toInt();
+		auto image_download = jdom["image_download"].toInt();
+		auto description = jdom["description"].toString();
+
+		SSqlConnectionWrap wrap;
+		QSqlQuery query(wrap.openConnection());
+		//auto data = request.body();
+		//if (data.isEmpty()) {
+		//	return SResult::error(SResultCode::ParamMissing);
+		//}
+		//auto parse = SHttpPartParse(data);
+		//if (!parse.parse()) {
+		//	return SResult::error(SResultCode::ParamInvalid);
+		//}
+		//auto path = QString("../images/upload/%1/").arg(owner_id);
+		//QDir dir;
+		//if (!dir.exists(path)) {
+		//	dir.mkpath(path);
+		//}
+		////图片路径格式：images/upload/owner_id/user_account_时间戳_图片原名称.后缀名
+		//QFile file(QString(path + user_account
+		//	+ "_" + QDateTime::currentDateTime().toString("yyyyMMddHHmmss")
+		//	+ "_" + QFileInfo(parse.filename()).fileName()));
+		//if (!file.open(QIODevice::WriteOnly)) {
+		//	return SResult::error(SResultCode::ServerFileError);
+		//}
+		//file.write(parse.data());
+		//把路径写入数据库
+		query.prepare(QString("UPDATE user_image SET image_name='%1',image_type='%2',description='%3',image_share=%4,image_download=%5 WHERE id=%6")
+			.arg(image_name)
+			.arg(image_type)
+			.arg(description)
+			.arg(image_share)
+			.arg(image_download)
+			.arg(u_id)
+		);
+		query.exec();
+#if _DEBUG
+		qDebug() << "用户图片修改";
+		qDebug() << query.lastQuery();
+#endif
+		CheckSqlQuery(query,responder);
+
+		//检查是否插入成功
+		if (query.numRowsAffected() == 0) {
+			resSuccess(SResult::success(SResultCode::SuccessButNoData), responder);
+			return;
+		}
+
+		resSuccess(SResult::success(), responder);
+		return;
 		});
 }
 

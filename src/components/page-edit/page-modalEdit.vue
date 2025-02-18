@@ -113,12 +113,14 @@
 import { LOGIN_TOKEN } from '@/global/constants';
 import { BASE_URL } from '@/service/config';
 import useSystemStore from '@/store/main/system/system';
+import { T_pageType } from '@/store/main/system/types';
 import { localCache } from '@/utils/cache';
 import { ElForm, ElMessage } from 'element-plus';
 import { reactive, ref } from 'vue';
 
 interface IProps {
   modalEditConfig: {
+    pageType: T_pageType;
     dialogWidth?: string;
     pageName: string;
     labelWidth?: number;
@@ -133,7 +135,7 @@ for (const item of props.modalEditConfig.formItems) {
   initialForm[item.prop] = item.initialValue ?? '';
 }
 const formData = reactive(initialForm);
-
+const page_type = ref(props.modalEditConfig.pageType);
 const dialogVisible = ref(false);
 const systemStore = useSystemStore();
 
@@ -203,19 +205,35 @@ function handleAvatarSuccess(response: any) {
  * 点击了【确定】，发送请求，修改用户信息
  */
 function handleSubmit() {
-  //1. 发送请求
-  systemStore
-    .updateUserAction(edit_id.value!, formData, queryCondition.value)
-    .then(() => {
-      //2. 显示成功提示
-      ElMessage.success('修改用户信息成功！');
+  if (page_type.value === T_pageType.PAGE_USER) {
+    //1. 发送请求
+    systemStore
+      .updateUserAction(edit_id.value!, formData, queryCondition.value)
+      .then(() => {
+        //2. 显示成功提示
+        ElMessage.success('修改用户信息成功！');
 
-      //3. 刷新列表
-      formRef.value?.resetFields();
-    })
-    .catch(() => {
-      ElMessage.info('取消修改');
-    });
+        //3. 刷新列表
+        formRef.value?.resetFields();
+      })
+      .catch((error: any) => {
+        ElMessage.info(error.message);
+      });
+  } else if (page_type.value === T_pageType.PAGE_IMAGE) {
+    systemStore
+      .updateImageAction(edit_id.value!, formData, queryCondition.value)
+      .then(() => {
+        //2. 显示成功提示
+        ElMessage.success('修改图片信息成功！');
+
+        //3. 刷新列表
+        formRef.value?.resetFields();
+      })
+      .catch((error: any) => {
+        ElMessage.info(error.message);
+      });
+  }
+
   dialogVisible.value = false;
 }
 

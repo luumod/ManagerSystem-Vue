@@ -12,7 +12,14 @@
     <div class="table">
       <el-table :data="listData" border style="width: 100%" @selection-change="onSelectionChange">
         <template v-for="item in props.contentConfig.propsList" :key="item.prop">
-          <template v-if="item.type === 'enable'">
+          <template v-if="item.type === 'timer'">
+            <el-table-column align="center" v-bind="item">
+              <template #default="scope">
+                {{ formatUTC(scope.row[item.prop]) }}
+              </template>
+            </el-table-column>
+          </template>
+          <template v-else-if="item.type === 'enable'">
             <el-table-column align="center" v-bind="item">
               <template #default="scope">
                 <el-button
@@ -83,6 +90,7 @@ import {
   type T_queryImageData,
   type T_queryUserData
 } from '@/store/main/system/types';
+import { formatUTC } from '@/utils/format';
 import { ElMessage } from 'element-plus';
 import { computed, ref, type Ref } from 'vue';
 

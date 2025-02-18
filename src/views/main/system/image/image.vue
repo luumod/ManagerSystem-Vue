@@ -10,6 +10,7 @@
       @batchDeleteUsers-click="onClickedBatchDelete"
       @editUser-click="onClickedEditUser"
     >
+      <!-- 自定义图片显示 -->
       <template v-slot:image_path="scope">
         <el-image
           style="width: 100px; height: 100px"
@@ -22,6 +23,17 @@
             </div>
           </template>
         </el-image>
+      </template>
+
+      <!-- 自定义图片大小 -->
+      <template v-slot:image_size="scope">
+        <span>
+          {{
+            scope.row.image_size < 1024 * 1024
+              ? (scope.row.image_size / 1024).toFixed(0) + ' KB'
+              : (scope.row.image_size / 1024 / 1024).toFixed(1) + ' MB'
+          }}
+        </span>
       </template>
     </page-content>
     <page-modalEdit ref="modalEditRef" :modal-edit-config="modalEditConfig"></page-modalEdit>

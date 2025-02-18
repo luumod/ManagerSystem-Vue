@@ -36,7 +36,7 @@ class HYRequest {
         const { code, codestr, message } = response.data;
 
         //在此添加错误拦截
-        if (code !== undefined && code !== 0) {
+        if (code >= 1000) {
           const error = new C_Error(message, code, codestr);
           return Promise.reject(error);
         }

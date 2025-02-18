@@ -1,4 +1,7 @@
+import { T_pageType } from '@/store/main/system/types';
+
 const modalEditConfig = {
+  pageType: T_pageType.PAGE_IMAGE,
   dialogWidth: '75%',
   pageName: '编辑图片信息',
   labelWidth: 100,
