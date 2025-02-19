@@ -350,6 +350,7 @@ Server::Server()
 	checkCORS_OPTIONS(QString("/api/version"));
 	checkCORS_OPTIONS(QString("/login"));
 	checkCORS_OPTIONS(QString("/register"));
+
 	checkCORS_OPTIONS(QString("/user/<arg>"));
 	checkCORS_OPTIONS(QString("/user/list"));
 	checkCORS_OPTIONS(QString("/user/create"));
@@ -363,6 +364,7 @@ Server::Server()
 	checkCORS_OPTIONS(QString("/images"));
 	checkCORS_OPTIONS(QString("/public/images/upload/<arg>"));
 
+	checkCORS_OPTIONS(QString("/fake_upload"));
 	checkCORS_OPTIONS(QString("/check/account/<arg>"));
 	checkCORS_OPTIONS(QString("/role/<arg>/menu"));
 
@@ -802,7 +804,7 @@ void Server::route_managerUserSystem()
 			return;
 		});
 
-	//用户修改
+	//用户信息修改
 	m_server.route("/user/<arg>", QHttpServerRequest::Method::Patch,
 		[](const QString& id, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
 		CheckJsonParse(request, responder);
@@ -924,7 +926,6 @@ void Server::route_managerUserSystem()
 		return;
 		});
 
-	checkCORS_OPTIONS(QString("/fake_upload"));
 	//用户图片伪上传: 为了满足 el-upload 显示图片
 	m_server.route("/fake_upload", QHttpServerRequest::Method::Post,
 		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
@@ -938,45 +939,6 @@ void Server::route_managerUserSystem()
 			resSuccess(SResult::success(), responder);
 			return;
 		});
-
-	//checkCORS_OPTIONS(QString("/user/<arg>/test_upload"));
-	////用户图片伪上传: 为了满足 el-upload 显示图片
-	//m_server.route("/user/<arg>/<arg>/test_upload", QHttpServerRequest::Method::Post,
-	//	[](const QString& owner_id, const QString& id, const QHttpServerRequest& request, QHttpServerResponder&& responder) {
-
-	//		//校验参数
-	//		std::optional<QByteArray> token = CheckToken(request);
-	//		if (token.has_value()) { //token校验失败
-	//			resError(token.value(), responder);
-	//			return;
-	//		}
-	//		CheckIsInt(owner_id, responder);
-
-	//		//解析图片数据
-	//		auto data = request.body();
-	//		if (data.isEmpty()) {
-	//			resError(SResult::error(SResultCode::ParamMissing), responder);
-	//			return;
-	//		}
-	//		auto parse = SHttpPartParse(data);
-	//		if (!parse.parse()) {
-	//			resError(SResult::error(SResultCode::ParamInvalid), responder);
-	//			return;
-	//		}
-	//		auto path = QString("/public/images/upload/%1/").arg(u_id);
-	//		QDir dir;
-	//		if (!dir.exists("." + path)) {
-	//			dir.mkpath("." + path);
-	//		}
-	//		auto image_id = id.toVa;
-	//		//图片路径格式：/public/images/upload/owner_id/id.后缀名
-	//		auto file_path = QString(path + QString::number(id) + "." + QFileInfo(parse.filename()).suffix());
-
-	//		QJsonObject jobj;
-	//		jobj.insert("url", file_path);
-	//		resSuccess(SResult::success(jobj), responder);
-	//		return;
-	//	});
 
 	//用户头像获取: GET
 	m_server.route("/public/images/avatar/<arg>", QHttpServerRequest::Method::Get,

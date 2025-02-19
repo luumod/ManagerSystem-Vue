@@ -256,7 +256,7 @@ function fetchBatchDeleteImages(ids: number[], queryInfo: T_queryImageData) {
  * @param queryInfo 同时满足查询条件
  */
 function fetchUpdateUser(item_data: any, queryInfo: T_queryUserData) {
-  systemStore.updateUserAction(item_data.id, { isEnable: item_data.isEnable }, queryInfo);
+  //systemStore.updateUserAction(item_data.id, { isEnable: item_data.isEnable }, queryInfo);
 }
 
 defineExpose({

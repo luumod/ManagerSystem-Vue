@@ -8,8 +8,10 @@ import {
   deleteImageData,
   deleteUserData,
   getImageListData,
+  getUserAvatar,
   getUserListData,
-  updateUserData
+  updateUserAvatarData,
+  updateUserInfoData
 } from '@/service/main/system/system';
 import { defineStore } from 'pinia';
 import type {
@@ -72,12 +74,28 @@ const useSystemStore = defineStore('system', {
         throw error;
       }
     },
-    async updateUserAction(
+    async getUserAvatarAction(url: string) {
+      try {
+        return await getUserAvatar(url);
+      } catch (error) {
+        throw error;
+      }
+    },
+    async updateUserInfoAction(
       id: number,
       update_user_params: T_updateUserInfo | any,
       queryInfo: T_queryUserData = default_query_condition
     ) {
-      await updateUserData(id, update_user_params).then(() => {
+      await updateUserInfoData(id, update_user_params).then(() => {
+        this.getUserListAction(queryInfo);
+      });
+    },
+    async updateUserAvatarAction(
+      id: number,
+      queryInfo: T_queryUserData = default_query_condition,
+      file: File
+    ) {
+      await updateUserAvatarData(id, file).then(() => {
         this.getUserListAction(queryInfo);
       });
     },
@@ -89,12 +107,6 @@ const useSystemStore = defineStore('system', {
         .catch((error) => {
           throw error; //账号重复
         });
-    },
-    updateUserAvatar(userId: number, newAvatarUrl: string) {
-      const user = this.user_list.find((u) => u.id === userId);
-      if (user) {
-        user.avatar_path = newAvatarUrl;
-      }
     },
 
     /***
@@ -133,7 +145,7 @@ const useSystemStore = defineStore('system', {
         //2. 更新列表
         this.getImageListAction(queryInfo);
       });
-    },
+    }
   }
 });
 

@@ -54,16 +54,43 @@ export function createNewUser(new_user_params: T_createUserParams, file: File) {
   });
 }
 
+export function getUserAvatar(avatar_path: string) {
+  return hyRequest.get({
+    url: `${avatar_path}`
+  });
+}
+
 export function checkUserAccount(account: string) {
   return hyRequest.get({
     url: `/check/account/${account}`
   });
 }
 
-export function updateUserData(id: number, user_params: T_updateUserInfo) {
+/**
+ * 修改用户的基本信息
+ * @param id 用户id
+ * @param user_params 修改的信息
+ * @returns
+ */
+export function updateUserInfoData(id: number, user_info: T_updateUserInfo) {
   return hyRequest.patch({
     url: `/user/${id}`,
-    data: user_params
+    data: user_info
+  });
+}
+
+/**
+ * 修改用户的头像
+ * @param id 用户id
+ * @param file 上传的头像文件
+ * @returns
+ */
+export function updateUserAvatarData(id: number, file: File) {
+  const formData = new FormData();
+  formData.append('upload_avatar', file);
+  return hyRequest.post({
+    url: `/user/${id}/avatar`,
+    data: formData
   });
 }
 

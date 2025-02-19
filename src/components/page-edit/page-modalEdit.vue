@@ -104,7 +104,8 @@
 
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button type="primary" @click="handleSubmit_image">修改图片信息</el-button>
+        <el-button type="primary" @click="handleSubmit_baseInfo">修改基本信息</el-button>
       </template>
     </el-dialog>
   </div>
@@ -155,7 +156,7 @@ const formRef = ref<InstanceType<typeof ElForm>>();
  * @usage 【el-upload】的 action 属性
  */
 const uploadUrl = ref('');
-
+const res_url = ref('');
 const file_data = ref<File>();
 
 /**
@@ -186,8 +187,19 @@ async function showUpdateUserDlg(item_data: any, qc: any) {
   uploadUrl.value = BASE_URL + `/fake_upload`;
 
   //显示【图片/头像】：
-  const res_url = item_data.avatar_path ? item_data.avatar_path : item_data.image_path;
-  imageUrl.value = `${BASE_URL}${res_url}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
+  res_url.value = item_data.avatar_path ? item_data.avatar_path : item_data.image_path;
+  imageUrl.value = `${BASE_URL}${res_url.value}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
+
+  // systemStore.getUserAvatarAction(res_url.value).then((data: any) => {
+  //   const blob = new Blob([data], { type: 'image/jpeg' }); // 或者根据图片类型选择适当的 MIME 类型
+
+  //   // 将 Blob 转换为 File 对象
+  //   const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+
+  //   // 现在你可以将 file 保存到 file_data 或用于其他操作
+  //   file_data.value = file;
+  //   console.log(file_data.value); // 显示 File 对象
+  // });
 }
 
 /**
@@ -195,56 +207,55 @@ async function showUpdateUserDlg(item_data: any, qc: any) {
  * @param response 从服务器返回的响应数据
  */
 function handleAvatarSuccess(response: any, uploadFile: any) {
-  debugger;
   //1. 获取新的头像的url（在服务器的相对路径）
-  const newAvatarUrl = response.data.url;
+  //const newAvatarUrl = response.data.url;
 
   //2. 更新表单中的头像路径，同时更新 Store 中存储的用户头像数据
-  formData.avatar_path = newAvatarUrl;
-  systemStore.updateUserAvatar(edit_id.value!, newAvatarUrl);
+  //formData.avatar_path = newAvatarUrl;
+  //systemStore.updateUserAvatar(edit_id.value!, newAvatarUrl);
 
-  file_data.value = uploadFile.raw!;
+  file_data.value = uploadFile.raw;
 
   //3. 实时更新头像在el-avatar中的显示
-  imageUrl.value = `${BASE_URL}${newAvatarUrl}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
-  //imageUrl.value = URL.createObjectURL(uploadFile.raw!);
+  //imageUrl.value = `${BASE_URL}${newAvatarUrl}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!);
 }
 
 /**
  * 点击了【确定】，发送请求，修改用户信息
  */
-function handleSubmit() {
+function handleSubmit_baseInfo() {
   if (page_type.value === T_pageType.PAGE_USER) {
     //1. 发送请求
     systemStore
-      .updateUserAction(edit_id.value!, formData, queryCondition.value)
+      .updateUserInfoAction(edit_id.value!, formData, queryCondition.value)
       .then(() => {
-        //systemStore.uploadUserAvatarAction(edit_id.value!, file_data.value!);
         //2. 显示成功提示
         ElMessage.success('修改用户信息成功！');
-
-        //3. 刷新列表
-        formRef.value?.resetFields();
       })
       .catch((error: any) => {
         ElMessage.info(error.message);
       });
   } else if (page_type.value === T_pageType.PAGE_IMAGE) {
-    // systemStore
-    //   .updateImageAction(edit_id.value!, formData, queryCondition.value)
-    //   .then(() => {
-    //     systemStore.uploadImageAction(edit_id.value!, file_data.value!);
-    //     //2. 显示成功提示
-    //     ElMessage.success('修改图片信息成功！');
-    //     //3. 刷新列表
-    //     formRef.value?.resetFields();
-    //   })
-    //   .catch((error: any) => {
-    //     ElMessage.info(error.message);
-    //   });
   }
 
-  dialogVisible.value = false;
+  //dialogVisible.value = false;
+}
+
+function handleSubmit_image() {
+  if (page_type.value === T_pageType.PAGE_USER) {
+    //1. 发送请求
+    systemStore
+      .updateUserAvatarAction(edit_id.value!, queryCondition.value, file_data.value!)
+      .then(() => {
+        //2. 显示成功提示
+        ElMessage.success('修改用户头像成功！');
+      })
+      .catch((error: any) => {
+        ElMessage.info(error.message);
+      });
+  } else if (page_type.value === T_pageType.PAGE_IMAGE) {
+  }
 }
 
 defineExpose({ showUpdateUserDlg });
