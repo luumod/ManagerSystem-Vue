@@ -111,6 +111,7 @@ export interface T_queryUserData extends T_queryCondition {
 }
 
 export interface T_queryImageData extends T_queryCondition {
+  owner_id?: number;
   image_name: string;
   image_type: string;
   image_format: string;

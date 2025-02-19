@@ -218,10 +218,14 @@ function onBatchDeleteUsers() {
  * @param queryInfo 查询条件，默认为空，1页，20条
  */
 function fetchUserListData(queryInfo: T_queryUserData = default_query_condition) {
+  currentPage.value = queryInfo.page ?? 1;
+  pageSize.value = queryInfo.pageSize ?? 20;
   systemStore.getUserListAction(queryInfo);
 }
 
 function fetchImageListData(queryInfo: T_queryImageData = default_queryImage_condition) {
+  currentPage.value = queryInfo.page ?? 1;
+  pageSize.value = queryInfo.pageSize ?? 6;
   systemStore.getImageListAction(queryInfo);
 }
 
@@ -256,7 +260,7 @@ function fetchBatchDeleteImages(ids: number[], queryInfo: T_queryImageData) {
  * @param queryInfo 同时满足查询条件
  */
 function fetchUpdateUser(item_data: any, queryInfo: T_queryUserData) {
-  //systemStore.updateUserAction(item_data.id, { isEnable: item_data.isEnable }, queryInfo);
+  systemStore.updateUserInfoAction(item_data.id, { isEnable: item_data.isEnable }, queryInfo);
 }
 
 defineExpose({

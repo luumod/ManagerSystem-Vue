@@ -3,13 +3,14 @@ import {
   batchDeleteImageData,
   batchDeleteUserData,
   checkUserAccount,
-  createNewImage,
+  createImageData,
   createNewUser,
   deleteImageData,
   deleteUserData,
   getImageListData,
-  getUserAvatar,
   getUserListData,
+  updateImageData,
+  updateImageInfoData,
   updateUserAvatarData,
   updateUserInfoData
 } from '@/service/main/system/system';
@@ -74,13 +75,6 @@ const useSystemStore = defineStore('system', {
         throw error;
       }
     },
-    async getUserAvatarAction(url: string) {
-      try {
-        return await getUserAvatar(url);
-      } catch (error) {
-        throw error;
-      }
-    },
     async updateUserInfoAction(
       id: number,
       update_user_params: T_updateUserInfo | any,
@@ -113,12 +107,8 @@ const useSystemStore = defineStore('system', {
      * 图片列表操作
      * @param queryInfo 查询条件
      */
-    async getImageListAction(
-      queryInfo: T_queryImageData = default_queryImage_condition,
-      owner_id: string = localCache.getCache(USER_ID)
-    ) {
+    async getImageListAction(queryInfo: T_queryImageData = default_queryImage_condition) {
       await getImageListData(queryInfo).then((image_list_byID) => {
-        console.log(image_list_byID);
         const { total_records, images } = image_list_byID.data;
         this.image_list_byID = images;
         this.total_image_count_byID = total_records;
@@ -126,7 +116,7 @@ const useSystemStore = defineStore('system', {
     },
     async createNewImageAction(new_image_params: T_uploadImageParams, file: File) {
       try {
-        await createNewImage(new_image_params, file);
+        await createImageData(new_image_params, file);
         this.getImageListAction();
       } catch (error) {
         throw error;
@@ -143,6 +133,24 @@ const useSystemStore = defineStore('system', {
       //1. 批量删除
       await batchDeleteImageData(ids).then(() => {
         //2. 更新列表
+        this.getImageListAction(queryInfo);
+      });
+    },
+    async updateImageInfoAction(
+      id: number,
+      update_image_params: T_updateImageInfo | any,
+      queryInfo: T_queryImageData = default_queryImage_condition
+    ) {
+      await updateImageInfoData(id, update_image_params).then(() => {
+        this.getImageListAction(queryInfo);
+      });
+    },
+    async updateImageAction(
+      id: number,
+      queryInfo: T_queryImageData = default_queryImage_condition,
+      file: File
+    ) {
+      await updateImageData(id, file).then(() => {
         this.getImageListAction(queryInfo);
       });
     }

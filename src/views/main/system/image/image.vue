@@ -1,6 +1,10 @@
 <template>
   <div class="image">
-    <page-search :search-config="searchConfig"></page-search>
+    <page-search
+      :search-config="searchConfig"
+      @search-click="onClickedSearchImage"
+      @reset-click="onClickedResetImage"
+    ></page-search>
     <page-content
       ref="contentRef"
       :content-config="contentConfig"
@@ -59,6 +63,7 @@ import { ref } from 'vue';
 import { default_queryImage_condition, type T_queryImageData } from '@/store/main/system/types';
 import { localCache } from '@/utils/cache';
 import { LOGIN_TOKEN } from '@/global/constants';
+import usePageSearch from '@/hooks/usePageSearch';
 //import usePageSearch from '@/hooks/usePageSearch';
 
 const imageCondition = ref<T_queryImageData>({ ...default_queryImage_condition });
@@ -91,7 +96,7 @@ const onClickedBatchDelete = createOnClickedBatchDeleteChanger({
   fetchMethod: 'fetchBatchDeleteImages'
 });
 
-//const { onClickedSearch, onClickedReset } = usePageSearch(contentRef, conditionRef);
+const { onClickedSearchImage, onClickedResetImage } = usePageSearch(contentRef, imageCondition);
 </script>
 
 <style scoped lang="less">

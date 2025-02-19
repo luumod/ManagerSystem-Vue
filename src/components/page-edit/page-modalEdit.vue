@@ -46,6 +46,18 @@
                         fit="contain"
                         :preview-src-list="[imageUrl]"
                       />
+                      <el-upload
+                        class="upload-btn"
+                        :action="uploadUrl"
+                        :headers="{ Authorization: `Bearer ${localCache.getCache(LOGIN_TOKEN)}` }"
+                        :auto-upload="true"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccess"
+                      >
+                        <el-button type="primary" plain>
+                          <el-icon><Upload /></el-icon>更换图片
+                        </el-button>
+                      </el-upload>
                     </div>
                   </template>
                 </template>
@@ -190,16 +202,6 @@ async function showUpdateUserDlg(item_data: any, qc: any) {
   res_url.value = item_data.avatar_path ? item_data.avatar_path : item_data.image_path;
   imageUrl.value = `${BASE_URL}${res_url.value}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
 
-  // systemStore.getUserAvatarAction(res_url.value).then((data: any) => {
-  //   const blob = new Blob([data], { type: 'image/jpeg' }); // 或者根据图片类型选择适当的 MIME 类型
-
-  //   // 将 Blob 转换为 File 对象
-  //   const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-
-  //   // 现在你可以将 file 保存到 file_data 或用于其他操作
-  //   file_data.value = file;
-  //   console.log(file_data.value); // 显示 File 对象
-  // });
 }
 
 /**
@@ -237,6 +239,15 @@ function handleSubmit_baseInfo() {
         ElMessage.info(error.message);
       });
   } else if (page_type.value === T_pageType.PAGE_IMAGE) {
+    systemStore
+      .updateImageInfoAction(edit_id.value!, formData, queryCondition.value)
+      .then(() => {
+        //2. 显示成功提示
+        ElMessage.success('修改图片信息成功！');
+      })
+      .catch((error: any) => {
+        ElMessage.info(error.message);
+      });
   }
 
   //dialogVisible.value = false;
@@ -255,6 +266,16 @@ function handleSubmit_image() {
         ElMessage.info(error.message);
       });
   } else if (page_type.value === T_pageType.PAGE_IMAGE) {
+    //1. 发送请求
+    systemStore
+      .updateImageAction(edit_id.value!, queryCondition.value, file_data.value!)
+      .then(() => {
+        //2. 显示成功提示
+        ElMessage.success('修改图片数据成功！');
+      })
+      .catch((error: any) => {
+        ElMessage.info(error.message);
+      });
   }
 }
 

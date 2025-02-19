@@ -1,5 +1,5 @@
-import type { T_queryUserData } from '@/store/main/system/types';
-import { default_query_condition } from '@/store/main/system/types';
+import type { T_queryImageData, T_queryUserData } from '@/store/main/system/types';
+import { default_query_condition, default_queryImage_condition } from '@/store/main/system/types';
 import { type Ref } from 'vue';
 
 /**
@@ -20,6 +20,11 @@ function usePageSearch(contentRef: any, conditionRef: Ref<any>) {
     contentRef.value?.fetchUserListData(formData);
   }
 
+  function onClickedSearchImage(formData: T_queryImageData) {
+    conditionRef.value = { ...formData };
+    contentRef.value?.fetchImageListData(formData);
+  }
+
   /**
    * 点击重置按钮会发送请求，重置搜索条件，查询所有用户列表
    */
@@ -28,9 +33,16 @@ function usePageSearch(contentRef: any, conditionRef: Ref<any>) {
     contentRef.value?.fetchUserListData();
   }
 
+  function onClickedResetImage() {
+    conditionRef.value = { ...default_queryImage_condition };
+    contentRef.value?.fetchImageListData();
+  }
+
   return {
     onClickedSearch,
-    onClickedReset
+    onClickedSearchImage,
+    onClickedReset,
+    onClickedResetImage
   };
 }
 
