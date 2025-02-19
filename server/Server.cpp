@@ -650,6 +650,7 @@ void Server::route_managerUserSystem()
 		auto user_name = uquery.queryItemValue("user_name");
 		auto mobile = uquery.queryItemValue("mobile");
 		auto email = uquery.queryItemValue("email");
+		email.replace("%40", "@"); //处理邮箱中的@符号
 		auto gender = uquery.queryItemValue("gender").toInt();
 
 		SSqlConnectionWrap wrap;
@@ -1228,11 +1229,20 @@ void Server::route_imageManagement()
 			dir.mkpath("." + path);
 		}
 		//把路径写入数据库
-		auto owner_id = uquery.queryItemValue("owner_id").toInt();	
+		auto owner_id = uquery.queryItemValue("owner_id");	
+		CheckIsInt(owner_id, responder);
+
+		QString image_name = "";
+		if (uquery.queryItemValue("image_name").isEmpty()) {
+			image_name = QFileInfo(parse.filename()).baseName();
+		}
+		else {
+			image_name = uquery.queryItemValue("image_name");
+		}
 
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
-		query.prepare(QString("select user_name from user_info where id=%1").arg(owner_id));
+		query.prepare(QString("select user_name from user_info where id=%1").arg(u_id));
 		query.exec();
 		CheckSqlQuery(query,responder);
 		query.next();
@@ -1240,7 +1250,7 @@ void Server::route_imageManagement()
 		query.prepare(QString("INSERT IGNORE INTO user_image(owner_id,image_name,image_type,upload_time,description,image_format,image_share,image_download,owner_name) \
 		VALUES (%1,'%2','%3','%4','%5','%6',%7,%8,'%9')")
 			.arg(owner_id)
-			.arg(QFileInfo(parse.filename()).baseName())
+			.arg(image_name)
 			.arg(image_type)
 			.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"))
 			.arg(description)
