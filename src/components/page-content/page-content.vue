@@ -145,9 +145,6 @@ if (props.contentConfig.page_name == 'user_list') {
   fetchImageListData();
 }
 
-//2. 获取响应式的对象
-//const { user_list, total_count } = storeToRefs(systemStore);
-
 /**
  * 选中的多条用户数据行
  * @param val 选中的多条数据行
@@ -171,7 +168,7 @@ function onCurrentPageChange() {
 }
 
 /**
- * 处理用户的删除，为了同时满足用户自定义查询条件，发送信号到外部处理
+ * 处理数据行的删除，为了同时满足用户自定义查询条件，发送信号到外部处理
  * @param id 要删除的用户的id
  */
 function onDeleteUser(id: number) {
@@ -187,7 +184,7 @@ function onEditUser(item_data: any) {
 }
 
 /**
- * 处理用户的启用/禁用
+ * 处理数据行的启用/禁用
  * @param item_data 要设置状态的用户的数据
  */
 function onSetEnableUser(item_data: any) {
@@ -196,25 +193,26 @@ function onSetEnableUser(item_data: any) {
 }
 
 /**
- * 新建用户
+ * 新建数据行
  */
 function onCreatedNewUser() {
   emit('createdNewUser-click');
 }
 
 /**
- * 批量删除用户
+ * 批量删除数据行
  */
 function onBatchDeleteUsers() {
   if (multipleSelection.value == undefined) {
     ElMessage.error('请先勾选要删除的数据行');
   } else {
-    emit('batchDeleteUsers-click', multipleSelection.value);
+    const ids: number[] = multipleSelection.value.map((item: any) => item.id);
+    emit('batchDeleteUsers-click', ids);
   }
 }
 
 /**
- * 发送网络请求：查询满足条件的用户列表
+ * 发送网络请求：查询满足条件的数据列表
  * @param queryInfo 查询条件，默认为空，1页，20条
  */
 function fetchUserListData(queryInfo: T_queryUserData = default_query_condition) {

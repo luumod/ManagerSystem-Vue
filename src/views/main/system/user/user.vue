@@ -12,8 +12,8 @@
       :content-config="contentConfig"
       @changePage="onChangePage"
       @changePageSize="onChangePageSize"
-      @deleteUser-click="onClickedDelete"
-      @batchDeleteUsers-click="onClickedBatchDelete"
+      @deleteUser-click="onClickedDeleteUser"
+      @batchDeleteUsers-click="onClickedBatchDeleteUser"
       @createdNewUser-click="onClickedCreatedNewUser"
       @editUser-click="onClickedEditUser"
       @changeEnableUser-click="onClickedChanegeEnableUser"
@@ -34,7 +34,7 @@ import PageContent from '@/components/page-content/page-content.vue';
 import PageModalEdit from '@/components/page-edit/page-modalEdit.vue';
 import PageCreated from '@/components/page-created/page-created.vue';
 
-  import usePageSearch from '@/hooks/usePageSearch';
+import usePageSearch from '@/hooks/usePageSearch';
 import usePageContent from '@/hooks/usePageContent';
 import { default_query_condition, type T_queryUserData } from '@/store/main/system/types';
 import { ref } from 'vue';
@@ -45,31 +45,14 @@ const {
   contentRef,
   modalRef,
   modalEditRef,
-  createPageChanger,
-  createPageSizeChanger,
-  createOnClickedDeleteChanger,
-  createOnClickedBatchDeleteChanger,
+  onChangePage,
+  onChangePageSize,
+  onClickedDeleteUser,
+  onClickedBatchDeleteUser,
   onClickedChanegeEnableUser,
   onClickedEditUser,
   onClickedCreatedNewUser
 } = usePageContent(userCondition);
-
-const onChangePage = createPageChanger({
-  condRef: userCondition,
-  fetchMethod: 'fetchUserListData'
-});
-const onChangePageSize = createPageSizeChanger({
-  condRef: userCondition,
-  fetchMethod: 'fetchUserListData'
-});
-const onClickedDelete = createOnClickedDeleteChanger({
-  condRef: userCondition,
-  fetchMethod: 'fetchDeleteUser'
-});
-const onClickedBatchDelete = createOnClickedBatchDeleteChanger({
-  condRef: userCondition,
-  fetchMethod: 'fetchBatchDeleteUsers'
-});
 
 const { onClickedSearch, onClickedReset } = usePageSearch(contentRef, userCondition);
 </script>

@@ -8,10 +8,10 @@
     <page-content
       ref="contentRef"
       :content-config="contentConfig"
-      @changePage="onChangePage"
-      @changePageSize="onChangePageSize"
-      @deleteUser-click="onClickedDelete"
-      @batchDeleteUsers-click="onClickedBatchDelete"
+      @changePage="onChangePageImage"
+      @changePageSize="onChangePageSizeImage"
+      @deleteUser-click="onClickedDeleteImage"
+      @batchDeleteUsers-click="onClickedBatchDeleteImage"
       @editUser-click="onClickedEditUser"
       @createdNewUser-click="onClickedCreatedNewUser"
     >
@@ -42,7 +42,7 @@
       </template>
     </page-content>
     <page-created ref="modalRef" :created-config="createdConfig"> </page-created>
-    <page-modalEdit ref="modalEditRef" :modal-edit-config="modalEditConfig"></page-modalEdit>
+    <page-modal-edit ref="modalEditRef" :modal-edit-config="modalEditConfig"></page-modal-edit>
   </div>
 </template>
 
@@ -70,30 +70,13 @@ const {
   contentRef,
   modalRef,
   modalEditRef,
-  createPageChanger,
-  createPageSizeChanger,
-  createOnClickedDeleteChanger,
-  createOnClickedBatchDeleteChanger,
+  onChangePageImage,
+  onChangePageSizeImage,
+  onClickedDeleteImage,
+  onClickedBatchDeleteImage,
   onClickedEditUser,
   onClickedCreatedNewUser
 } = usePageContent(imageCondition);
-
-const onChangePage = createPageChanger({
-  condRef: imageCondition,
-  fetchMethod: 'fetchImageListData'
-});
-const onChangePageSize = createPageSizeChanger({
-  condRef: imageCondition,
-  fetchMethod: 'fetchImageListData'
-});
-const onClickedDelete = createOnClickedDeleteChanger({
-  condRef: imageCondition,
-  fetchMethod: 'fetchDeleteImage'
-});
-const onClickedBatchDelete = createOnClickedBatchDeleteChanger({
-  condRef: imageCondition,
-  fetchMethod: 'fetchBatchDeleteImages'
-});
 
 const { onClickedSearchImage, onClickedResetImage } = usePageSearch(contentRef, imageCondition);
 </script>

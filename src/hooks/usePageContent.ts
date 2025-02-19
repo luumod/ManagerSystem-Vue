@@ -1,5 +1,4 @@
 import type PageContent from '@/components/page-content/page-content.vue';
-import type { T_queryImageData, T_queryUserData, T_userInfo } from '@/store/main/system/types';
 import type UserModalEdit from '@/components/page-edit/page-modalEdit.vue';
 import type UserCreated from '@/components/page-created/page-created.vue';
 import { ref, type Ref } from 'vue';
@@ -23,77 +22,55 @@ function usePageContent(conditionRef: Ref<any>) {
   const modalEditRef = ref<InstanceType<typeof UserModalEdit>>();
   const modalRef = ref<InstanceType<typeof UserCreated>>();
 
-  type FetchListMethods = {
-    fetchUserListData: T_queryUserData;
-    fetchImageListData: T_queryImageData;
-  };
   /**
    * 改变页码会发送请求，按新的页码查询用户列表（可满足查询条件）
    * @param page 页码
    */
-  // function onChangePage(page: number) {
-  //   conditionRef.value.page = page;
-  //   contentRef.value?.fetchUserListData(conditionRef.value);
-  // }
-  function createPageChanger<K extends keyof FetchListMethods>(config: {
-    condRef: Ref<FetchListMethods[K]>;
-    fetchMethod: K;
-  }) {
-    return (page: number) => {
-      config.condRef.value.page = page;
-      (contentRef.value as any)?.[config.fetchMethod](config.condRef.value); //(contentRef.value as any)?
-    };
+  function onChangePage(page: number) {
+    conditionRef.value.page = page;
+    contentRef.value?.fetchUserListData(conditionRef.value);
+  }
+
+  function onChangePageImage(page: number) {
+    conditionRef.value.page = page;
+    contentRef.value?.fetchImageListData(conditionRef.value);
   }
 
   /**
    * 改变每页显示条数会发送请求，按新的每页显示条数查询用户列表（可满足查询条件）
    * @param pageSize 每页显示条数
    */
-  function createPageSizeChanger<K extends keyof FetchListMethods>(config: {
-    condRef: Ref<FetchListMethods[K]>;
-    fetchMethod: K;
-  }) {
-    return (pageSize: number) => {
-      config.condRef.value.pageSize = pageSize;
-      (contentRef.value as any)?.[config.fetchMethod](config.condRef.value); //(contentRef.value as any)?
-    };
+  function onChangePageSize(page: number) {
+    conditionRef.value.page = page;
+    contentRef.value?.fetchUserListData(conditionRef.value);
   }
-
-  type FetchDeleteMethods = {
-    fetchDeleteUser: T_queryUserData;
-    fetchDeleteImage: T_queryImageData;
-  };
+  function onChangePageSizeImage(pageSize: number) {
+    conditionRef.value.pageSize = pageSize;
+    contentRef.value?.fetchImageListData(conditionRef.value);
+  }
 
   /**
    * 点击删除按钮会发送请求，删除指定用户（可满足查询条件）
    * @param id 用户id
    */
-  function createOnClickedDeleteChanger<K extends keyof FetchDeleteMethods>(config: {
-    condRef: Ref<FetchDeleteMethods[K]>;
-    fetchMethod: K;
-  }) {
-    return (id: number) => {
-      (contentRef.value as any)?.[config.fetchMethod](id, config.condRef.value); //(contentRef.value as any)?
-    };
+  function onClickedDeleteUser(id: number) {
+    contentRef.value?.fetchDeleteUser(id, conditionRef.value);
+  }
+  function onClickedDeleteImage(id: number) {
+    contentRef.value?.fetchDeleteImage(id, conditionRef.value);
   }
 
-  type FetchBatchDeleteMethods = {
-    fetchBatchDeleteUsers: T_queryUserData;
-    fetchBatchDeleteImages: T_queryImageData;
-  };
   /**
+   *
    * 点击批量删除按钮会发送请求，批量删除指定用户（可满足查询条件）
    * @param user_infos 用户信息数组
    */
 
-  function createOnClickedBatchDeleteChanger<K extends keyof FetchBatchDeleteMethods>(config: {
-    condRef: Ref<FetchBatchDeleteMethods[K]>;
-    fetchMethod: K;
-  }) {
-    return (user_infos: T_userInfo[]) => {
-      const ids = user_infos.map((item) => item.id);
-      (contentRef.value as any)?.[config.fetchMethod](ids, config.condRef.value); //(contentRef.value as any)?
-    };
+  function onClickedBatchDeleteUser(ids: number[]) {
+    contentRef.value?.fetchBatchDeleteUsers(ids, conditionRef.value);
+  }
+  function onClickedBatchDeleteImage(ids: number[]) {
+    contentRef.value?.fetchBatchDeleteImages(ids, conditionRef.value);
   }
 
   /**
@@ -123,10 +100,14 @@ function usePageContent(conditionRef: Ref<any>) {
     contentRef,
     modalEditRef,
     modalRef,
-    createPageChanger,
-    createPageSizeChanger,
-    createOnClickedDeleteChanger,
-    createOnClickedBatchDeleteChanger,
+    onChangePage,
+    onChangePageSize,
+    onChangePageImage,
+    onChangePageSizeImage,
+    onClickedDeleteUser,
+    onClickedDeleteImage,
+    onClickedBatchDeleteUser,
+    onClickedBatchDeleteImage,
     onClickedChanegeEnableUser,
     onClickedEditUser,
     onClickedCreatedNewUser
