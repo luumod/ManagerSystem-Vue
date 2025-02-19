@@ -64,7 +64,6 @@ import { default_queryImage_condition, type T_queryImageData } from '@/store/mai
 import { localCache } from '@/utils/cache';
 import { LOGIN_TOKEN } from '@/global/constants';
 import usePageSearch from '@/hooks/usePageSearch';
-//import usePageSearch from '@/hooks/usePageSearch';
 
 const imageCondition = ref<T_queryImageData>({ ...default_queryImage_condition });
 const {

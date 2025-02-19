@@ -515,7 +515,7 @@ void Server::route_managerUserSystem()
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
 
-		QString sql = "SELECT * FROM user_info where isDeleted=false AND id=%1";
+		QString sql = "SELECT * FROM user_info where id=%1";
 		query.prepare(sql.arg(u_id));
 		query.exec();
 #if _DEBUG
