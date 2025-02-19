@@ -66,7 +66,7 @@ export function checkUserAccount(account: string) {
  * @param user_params 修改的信息
  * @returns
  */
-export function updateUserInfoData(id: number, user_info: T_updateUserInfo) {
+export function updateUserInfoData(id: number, user_info: T_updateUserInfo | { isEnable: number }) {
   return hyRequest.patch({
     url: `/user/${id}`,
     data: user_info

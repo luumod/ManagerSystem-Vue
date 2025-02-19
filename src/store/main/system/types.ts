@@ -15,6 +15,7 @@ export interface T_createUserParams {
  * 上传图片时，所需要的参数
  */
 export interface T_uploadImageParams {
+  image_name: string;
   image_type: string;
   description: string;
   image_share: number;

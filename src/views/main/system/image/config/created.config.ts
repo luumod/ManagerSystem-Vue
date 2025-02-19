@@ -22,6 +22,13 @@ const createdConfig = {
     },
     {
       type: 'input',
+      prop: 'image_name',
+      label: '图片名称',
+      placeholder: '请输入图片名称',
+      initialValue: ''
+    },
+    {
+      type: 'input',
       prop: 'image_type',
       label: '图片类型',
       placeholder: '请输入图片类型',

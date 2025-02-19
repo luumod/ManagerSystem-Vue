@@ -2,18 +2,19 @@ import { T_pageType } from '@/store/main/system/types';
 
 const createdConfig = {
   pageType: T_pageType.PAGE_USER,
-  dialogWidth: '75%',
+  dialogWidth: '50%',
   pageName: '新建用户',
   labelWidth: 100,
   formItems: [
     {
+      order: 'first',
       type: 'avatar',
       prop: 'avatar_path',
-      label: '头像',
       placeholder: '请上传头像',
       initialValue: ''
     },
     {
+      order: 'first',
       type: 'input',
       prop: 'user_account',
       label: '账号',
@@ -21,14 +22,7 @@ const createdConfig = {
       initialValue: ''
     },
     {
-      type: 'input',
-      prop: 'password',
-      label: '密码',
-      placeholder: '默认密码为123456，请登陆后修改',
-      initialValue: '123456',
-      read_only: true
-    },
-    {
+      order: 'first',
       type: 'input',
       prop: 'user_name',
       label: '姓名',
@@ -36,6 +30,16 @@ const createdConfig = {
       initialValue: ''
     },
     {
+      order: 'second',
+      type: 'input',
+      prop: 'password',
+      label: '密码',
+      placeholder: '登陆后修改密码',
+      initialValue: '',
+      read_only: true
+    },
+    {
+      order: 'second',
       type: 'select',
       prop: 'gender',
       label: '性别',
@@ -56,6 +60,7 @@ const createdConfig = {
       ]
     },
     {
+      order: 'second',
       type: 'input',
       prop: 'mobile',
       label: '电话',
@@ -63,6 +68,7 @@ const createdConfig = {
       initialValue: ''
     },
     {
+      order: 'second',
       type: 'input',
       prop: 'email',
       label: '邮箱',
