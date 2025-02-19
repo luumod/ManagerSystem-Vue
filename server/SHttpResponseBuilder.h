@@ -28,9 +28,13 @@ public:
 
 	SHttpResponseBuilder& addCORS() {
 		headers["Access-Control-Allow-Credentials"] = "true";
-		headers["Access-Control-Allow-Origin"] = "*";
+		headers["Access-Control-Allow-Origin"] = "*"; //http://localhost:5173
 		headers["Access-Control-Allow-Methods"] = "*";
 		headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+		headers["Cross-Origin-Resource-Policy"] = "same-site";
+		headers["X-Content-Type-Options"] = "nosniff";
+		headers["X-Frame-Options"] = "DENY";
+		headers["Vary"] = "Origin";
 		return *this;
 	}
 
