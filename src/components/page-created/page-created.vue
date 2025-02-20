@@ -10,15 +10,22 @@
         <el-tabs v-model="activeName" class="demo-tabs">
           <!-- 第一页 -->
           <el-tab-pane label="基础信息" name="first">
+            <template #label>
+              <span class="custom-tabs-label">
+                <span v-show="show_dot_1" class="dot1"></span>
+                <el-icon><User /></el-icon>
+                <span>基础信息</span>
+              </span>
+            </template>
             <el-form
               :model="formData"
-              ref="formRef"
+              ref="formRef_first"
               :rules="accountRules"
-              status-icon
               :label-width="props.createdConfig.labelWidth ?? '80px'"
+              status-icon
             >
-              <el-row>
-                <el-col :span="12">
+              <el-row :gutter="200">
+                <el-col :span="8">
                   <template v-for="item in props.createdConfig.formItems" :key="item.prop">
                     <template
                       v-if="
@@ -29,7 +36,7 @@
                         <!-- 头像区域 -->
                         <template v-if="item.type === 'avatar'">
                           <div class="avatar-wrapper">
-                            <span class="title">用户头像</span>
+                            <span class="title">点击上传头像</span>
                             <el-upload
                               class="avatar-uploader"
                               :action="uploadUrl"
@@ -40,13 +47,7 @@
                               :show-file-list="false"
                               :on-success="handleUploadSuccess"
                             >
-                              <el-avatar
-                                v-if="imageUrl"
-                                shape="square"
-                                :src="imageUrl"
-                                fit="cover"
-                                class="avatar"
-                              />
+                              <el-avatar v-if="imageUrl" :src="imageUrl" fit="cover" :size="120" />
                               <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                             </el-upload>
                           </div>
@@ -80,18 +81,28 @@
                   </template>
                 </el-col>
 
-                <el-col :span="12">
+                <el-col :span="16">
                   <template v-for="item in props.createdConfig.formItems" :key="item.prop">
                     <template v-if="item.order === 'first' && item.type === 'input'">
                       <el-form-item :label="item.label" :prop="item.prop">
                         <!-- 基础输入型组件 -->
                         <template v-if="item.type === 'input'">
-                          <el-input
-                            v-model="formData[item.prop]"
-                            :placeholder="item.placeholder"
-                            :readonly="item.read_only"
-                            :class="item.read_only ? 'readonly-item' : ''"
-                          />
+                          <div
+                            style="
+                              display: flex;
+                              justify-content: space-between;
+                              align-items: center;
+                            "
+                          >
+                            <el-input
+                              v-model="formData[item.prop]"
+                              :placeholder="item.placeholder"
+                              :readonly="item.read_only"
+                              :class="item.read_only ? 'readonly-item' : ''"
+                              style="width: 200px"
+                              clearable
+                            />
+                          </div>
                         </template>
                       </el-form-item>
                     </template>
@@ -103,18 +114,36 @@
 
           <!-- 第二页 -->
           <el-tab-pane label="详细信息" name="second">
+            <template #label>
+              <span class="custom-tabs-label">
+                <span v-show="show_dot_2" class="dot2"></span>
+                <el-icon><Edit /></el-icon>
+                <span>详细信息</span>
+              </span>
+            </template>
             <el-form
               :model="formData"
-              ref="formRef"
+              ref="formRef_second"
               :rules="accountRules"
               status-icon
               :label-width="props.createdConfig.labelWidth ?? '80px'"
             >
-              <el-row :gutter="24">
+              <el-row :gutter="60">
                 <template v-for="item in props.createdConfig.formItems" :key="item.prop">
-                  <template v-if="item.order === 'second'">
-                    <el-col :span="10">
+                  <template
+                    v-if="item.order === 'second' && item.type != 'avatar' && item.type != 'image'"
+                  >
+                    <el-col :span="12">
                       <el-form-item :label="item.label" :prop="item.prop">
+                        <!-- 少选型组件 -->
+                        <template v-if="item.type === 'radio'">
+                          <el-radio-group v-model="formData[item.prop]">
+                            <template v-for="option in item.options" :key="option.value">
+                              <el-radio :value="option.value">{{ option.label }}</el-radio>
+                            </template>
+                          </el-radio-group>
+                        </template>
+
                         <!-- 输入型组件 -->
                         <template v-if="item.type === 'input'">
                           <el-input
@@ -125,8 +154,8 @@
                           />
                         </template>
 
-                        <!-- 选择型组件 -->
-                        <template v-else-if="item.order === 'second' && item.type === 'select'">
+                        <!-- 多选型组件 -->
+                        <template v-else-if="item.type === 'select'">
                           <el-select
                             v-model="formData[item.prop]"
                             :placeholder="item.placeholder"
@@ -141,8 +170,18 @@
                           </el-select>
                         </template>
 
+                        <!-- 日期型组件 -->
+                        <template v-else-if="item.type === 'picker'">
+                          <el-date-picker
+                            v-model="formData[item.prop]"
+                            type="datetime"
+                            :disabled="true"
+                            :placeholder="item.placeholder"
+                          />
+                        </template>
+
                         <!-- 文本域 -->
-                        <template v-else-if="item.order === 'second' && item.type === 'textarea'">
+                        <template v-else-if="item.type === 'textarea'">
                           <el-input
                             v-model="formData[item.prop]"
                             type="textarea"
@@ -160,14 +199,25 @@
         </el-tabs>
       </div>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <template v-if="activeName === 'first'">
-          <el-button type="primary" @click="handleNextInfoPage">下一步</el-button>
-        </template>
-        <template v-else-if="activeName === 'second'">
-          <el-button type="primary" @click="handlePrevInfoPage">上一步</el-button>
-          <el-button type="success" @click="handleSubmit">确定</el-button>
-        </template>
+        <div class="footer">
+          <div></div>
+          <div>
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <template v-if="activeName === 'first'">
+              <el-button type="primary" @click="handleNextInfoPage(formRef_first)"
+                >下一步</el-button
+              >
+            </template>
+            <template v-else-if="activeName === 'second'">
+              <el-button type="primary" @click="handlePrevInfoPage">上一步</el-button>
+              <el-button type="success" @click="handleSubmit(formRef_first, formRef_second)"
+                >确定</el-button
+              >
+            </template>
+          </div>
+
+          <el-button color="#626aef" @click="handleGenerateRandomAll">随机生成</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -177,10 +227,16 @@
 import { LOGIN_TOKEN } from '@/global/constants';
 import { BASE_URL } from '@/service/config';
 import useSystemStore from '@/store/main/system/system';
-import { T_pageType } from '@/store/main/system/types';
+import { T_pageType } from '@/service/main/system/types';
 import { localCache } from '@/utils/cache';
-import { ElForm, ElMessage, type FormRules } from 'element-plus';
+import { ElForm, ElMessage, type FormInstance, type FormRules } from 'element-plus';
 import { computed, reactive, ref } from 'vue';
+import {
+  generateRandomAccount,
+  generateRandomEmail,
+  generateRandomMobile,
+  generateRandomUsername
+} from '@/global/random-gen';
 
 interface IProps {
   createdConfig: {
@@ -205,6 +261,8 @@ const file_data = ref<File>();
 const imageUrl = ref('');
 const uploadUrl = ref('');
 
+const show_dot_1 = ref(false);
+const show_dot_2 = ref(false);
 const tabsName = ref(['first', 'second']);
 const activeName = ref<string>(tabsName.value[0]);
 const current_tab = computed(() => {
@@ -214,45 +272,10 @@ const current_tab = computed(() => {
 const dialogVisible = ref(false);
 const systemStore = useSystemStore();
 
-// const validateAccount = (rule: any, value: string, callback: any) => {
-//   if (!value) {
-//     return callback(new Error('请输入账号！'));
-//   }
+const formRef_first = ref<FormInstance>();
+const formRef_second = ref<FormInstance>();
 
-//   if (!/^[a-zA-Z0-9]{6,20}$/.test(value)) {
-//     return callback(new Error('账号长度必须为6-20位字母或数字！'));
-//   }
-
-//   systemStore
-//     .checkUserAccountAction(value)
-//     .then(() => {
-//       callback();
-//     })
-//     .catch((error: any) => {
-//       callback(new Error(error.message));
-//     });
-// };
-
-// //校验规则
-// const accountRules: FormRules = {
-//   user_account: [{ validator: validateAccount, trigger: 'blur' }],
-//   user_name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-//   password: [
-//     { required: true, message: '请输入密码', trigger: 'blur' },
-//     { pattern: /^[a-zA-Z0-9]{6,20}$/, message: '密码长度必须在6-20位之间', trigger: 'blur' }
-//   ],
-//   mobile: [
-//     { required: true, message: '请输入手机号码', trigger: 'blur' },
-//     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
-//   ],
-//   email: [
-//     { required: true, message: '请输入邮箱', trigger: 'blur' },
-//     { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
-//   ]
-// };
-
-const formRef = ref<InstanceType<typeof ElForm>>();
-
+//校验账号
 const validateAccount = (rule: any, value: string, callback: any) => {
   if (!value) {
     return callback(new Error('请输入账号！'));
@@ -262,6 +285,7 @@ const validateAccount = (rule: any, value: string, callback: any) => {
     return callback(new Error('账号长度必须为6-20位字母或数字！'));
   }
 
+  //检查账号的唯一性
   systemStore
     .checkUserAccountAction(value)
     .then(() => {
@@ -272,6 +296,7 @@ const validateAccount = (rule: any, value: string, callback: any) => {
     });
 };
 
+//检查密码
 const validatePassword = (rule: any, value: string, callback: any) => {
   formData.password = '123456'; //默认密码
   callback();
@@ -286,47 +311,136 @@ const accountRules: FormRules = {
     { validator: validatePassword, trigger: 'blur' }
   ],
   mobile: [
-    { required: true, message: '请输入手机号码', trigger: 'blur' }
-    //{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+    { required: true, message: '请输入手机号码', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
-  ]
+  ],
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }]
 };
 
+/**
+ * 点击了【新建】，弹出新建数据行的弹窗
+ */
 function showCreatedNewUserDlg() {
   dialogVisible.value = true;
-
+  activeName.value = tabsName.value[0];
   uploadUrl.value = BASE_URL + `/fake_upload`; //占位
 }
 
+/**
+ * 随机生成符合格式的数据
+ */
+function handleGenerateRandomAll() {
+  //随机生成formData的所有数据
+  for (const item of props.createdConfig.formItems) {
+    switch (item.prop) {
+      case 'user_account':
+        formData[item.prop] = generateRandomAccount();
+        break;
+
+      case 'user_name':
+        formData[item.prop] = generateRandomUsername();
+        break;
+
+      case 'mobile':
+        formData[item.prop] = generateRandomMobile();
+        break;
+
+      case 'email':
+        formData[item.prop] = generateRandomEmail();
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
+/**
+ * 处理上传头像/图片成功
+ * @param response 服务器返回的响应
+ * @param uploadFile 上传的文件对象
+ */
 function handleUploadSuccess(response: any, uploadFile: any) {
   //主要是获取uploadFile
   if (response.code === 0) {
-    //raw就是File对象
+    //1. 让图片显示出来
     imageUrl.value = URL.createObjectURL(uploadFile.raw!);
+
+    //2. 保存图片数据
     file_data.value = uploadFile.raw!;
     //name: 文件名，在上传图片中用到，上传头像无需用到
   }
 }
 
-function handleNextInfoPage() {
-  if (current_tab.value < tabsName.value.length - 1) {
-    activeName.value = tabsName.value[current_tab.value + 1];
+/**
+ * 检查每一子页的输入信息的合法性，并且会弹出一个红色点点来提示用户某一页输入信息有误
+ * @param formEl （某一页的）表单实例
+ */
+async function checkFormValid(formEl: FormInstance | undefined) {
+  if (!formEl) {
+    throw new Error('页面错误！');
   }
-}
 
-function handlePrevInfoPage() {
-  if (current_tab.value > 0) {
-    activeName.value = tabsName.value[current_tab.value - 1];
+  try {
+    await formEl.validate((valid) => {
+      if (!valid) {
+        throw new Error('请输入正确的信息！');
+      }
+    });
+  } catch (error: any) {
+    if (formEl === formRef_first.value) show_dot_1.value = true;
+    else if (formEl === formRef_second.value) show_dot_2.value = true;
+    throw error;
   }
 }
 
 /**
- * 点击了【新建】，发送请求，新建一个用户
+ * 处理进入下一页前的校验
+ * @param formEl_first 上一页的表单实例
  */
-function handleSubmit() {
+async function handleNextInfoPage(formEl_first: FormInstance | undefined) {
+  try {
+    await checkFormValid(formEl_first);
+    if (current_tab.value < tabsName.value.length - 1) {
+      activeName.value = tabsName.value[current_tab.value + 1];
+      show_dot_1.value = false;
+    }
+  } catch (error: any) {
+    ElMessage.error(error.message);
+  }
+}
+
+/**
+ * 处理进入上一页前的校验
+ */
+function handlePrevInfoPage() {
+  if (current_tab.value > 0) {
+    activeName.value = tabsName.value[current_tab.value - 1];
+    show_dot_2.value = false;
+  }
+}
+
+/**
+ * 点击提交，校验输入信息，然后发创建请求
+ * @param formEl_first 上一页的表单实例
+ * @param formEl_second 下一页的表单实例
+ */
+async function handleSubmit(
+  formEl_first: FormInstance | undefined,
+  formEl_second: FormInstance | undefined
+) {
+  try {
+    await checkFormValid(formEl_first);
+    await checkFormValid(formEl_second);
+  } catch (error: any) {
+    ElMessage.error(error.message);
+    return;
+  }
+
   let action: Promise<any>;
   let successMessage: string;
 
@@ -345,7 +459,8 @@ function handleSubmit() {
     .then(() => {
       ElMessage.success(successMessage);
       dialogVisible.value = false;
-      formRef.value?.resetFields();
+      formEl_first!.resetFields();
+      formEl_second!.resetFields();
     })
     .catch((error: any) => {
       ElMessage.error(error.message); // 通过消息弹窗显示错误信息
@@ -364,6 +479,10 @@ defineExpose({ showCreatedNewUserDlg });
     :deep(.el-input__wrapper.is-focus) {
       box-shadow: 0 0 0 1px rgb(255, 33, 33) inset;
     }
+  }
+
+  .custom-tabs-label span {
+    margin-left: 6px;
   }
 
   .avatar-item {
@@ -385,7 +504,7 @@ defineExpose({ showCreatedNewUserDlg });
     padding-top: 0px;
     margin-top: 0px;
     .title {
-      font-size: 20px;
+      font-size: 16px;
       color: var(--el-text-color-secondary);
     }
     .avatar-uploader .avatar {
@@ -400,6 +519,9 @@ defineExpose({ showCreatedNewUserDlg });
       height: 178px;
       text-align: center;
     }
+  }
+  :global(.el-dialog__footer) {
+    padding-top: 0px;
   }
 }
 
@@ -422,5 +544,32 @@ defineExpose({ showCreatedNewUserDlg });
 
 .right-panel {
   padding-left: 20px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dot1 {
+  position: absolute;
+  top: 6px;
+  right: 11px;
+  z-index: 10;
+  width: 6px;
+  height: 6px;
+  background: red;
+  border-radius: 100%;
+}
+.dot2 {
+  position: absolute;
+  top: 5px;
+  right: -7px;
+  z-index: 10;
+  width: 6px;
+  height: 6px;
+  background: red;
+  border-radius: 100%;
 }
 </style>

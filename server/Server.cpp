@@ -652,16 +652,18 @@ void Server::route_managerUserSystem()
 		auto email = uquery.queryItemValue("email");
 		email.replace("%40", "@"); //处理邮箱中的@符号
 		auto gender = uquery.queryItemValue("gender").toInt();
+		auto isEnable =QVariant::fromValue(uquery.queryItemValue("isEnable")).toInt();
 
 		SSqlConnectionWrap wrap;
 		QSqlQuery query(wrap.openConnection());
-		QString sql = QString("INSERT IGNORE INTO user_info (user_account,password,user_name,gender,mobile,email) VALUES('%1','%2','%3',%4,'%5','%6')")
+		QString sql = QString("INSERT IGNORE INTO user_info (user_account,password,user_name,gender,mobile,email,isEnable) VALUES('%1','%2','%3',%4,'%5','%6',%7)")
 			.arg(user_account)
 			.arg(password)
 			.arg(user_name)
 			.arg(gender)
 			.arg(mobile)
-			.arg(email);
+			.arg(email)
+			.arg(isEnable);
 		query.exec(sql);
 		CheckSqlQuery(query,responder);
 

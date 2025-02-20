@@ -1,4 +1,4 @@
-import { T_pageType } from '@/store/main/system/types';
+import { T_pageType } from '@/service/main/system/types';
 
 const createdConfig = {
   pageType: T_pageType.PAGE_USER,
@@ -30,13 +30,39 @@ const createdConfig = {
       initialValue: ''
     },
     {
-      order: 'second',
+      order: 'first',
       type: 'input',
-      prop: 'password',
-      label: '密码',
-      placeholder: '登陆后修改密码',
-      initialValue: '',
-      read_only: true
+      prop: 'mobile',
+      label: '电话',
+      placeholder: '请输入电话',
+      initialValue: ''
+    },
+    {
+      order: 'first',
+      type: 'input',
+      prop: 'email',
+      label: '邮箱',
+      placeholder: '请输入邮箱',
+      initialValue: ''
+    },
+
+    {
+      order: 'second',
+      type: 'radio',
+      prop: 'isEnable',
+      disabled: true,
+      label: '状态',
+      initialValue: 1,
+      options: [
+        {
+          label: '启用',
+          value: 1
+        },
+        {
+          label: '禁用',
+          value: 2
+        }
+      ]
     },
     {
       order: 'second',
@@ -62,18 +88,19 @@ const createdConfig = {
     {
       order: 'second',
       type: 'input',
-      prop: 'mobile',
-      label: '电话',
-      placeholder: '请输入电话',
-      initialValue: ''
+      prop: 'password',
+      label: '密码',
+      placeholder: '默认123456，请在登陆后修改密码',
+      initialValue: '',
+      read_only: true
     },
     {
       order: 'second',
-      type: 'input',
-      prop: 'email',
-      label: '邮箱',
-      placeholder: '请输入邮箱',
-      initialValue: ''
+      type: 'picker',
+      prop: 'create_time',
+      label: '创建日期',
+      placeholder: '默认为当前时间',
+      initialValue: new Date()
     }
   ]
 };
