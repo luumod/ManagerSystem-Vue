@@ -201,7 +201,6 @@ async function showUpdateUserDlg(item_data: any, qc: any) {
   //显示【图片/头像】：
   res_url.value = item_data.avatar_path ? item_data.avatar_path : item_data.image_path;
   imageUrl.value = `${BASE_URL}${res_url.value}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`;
-
 }
 
 /**
@@ -268,7 +267,7 @@ function handleSubmit_image() {
   } else if (page_type.value === T_pageType.PAGE_IMAGE) {
     //1. 发送请求
     systemStore
-      .updateImageAction(edit_id.value!, queryCondition.value, file_data.value!)
+      .updateImageAction(edit_id.value!, file_data.value!, queryCondition.value)
       .then(() => {
         //2. 显示成功提示
         ElMessage.success('修改图片数据成功！');
