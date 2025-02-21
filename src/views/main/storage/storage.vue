@@ -13,15 +13,22 @@ import FilterImage from './c-cpns/filter-image.vue';
 import ContentImage from './c-cpns/content-image.vue';
 import type { T_imageInfo } from '@/store/main/system/types';
 import useStorageStore from '@/store/storage/storage';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { localCache } from '@/utils/cache';
 import { LOGIN_TOKEN } from '@/global/constants';
 import { BASE_URL } from '@/service/config';
+import type { IFilterImageEmits } from '@/store/storage/types';
+import { ElMessage } from 'element-plus';
 
 const storageStore = useStorageStore();
-storageStore.getImageListAction({
-  orderBy: 'default',
-  orderDirection: ''
+onMounted(() => {
+  // 超过5分钟才重新请求
+  if (Date.now() - storageStore.lastFetchTime > 300000) {
+    storageStore.resetCache().getImageListAction({
+      orderBy: 'default',
+      orderDirection: ''
+    });
+  }
 });
 
 interface IWaterfallItem {
@@ -31,7 +38,6 @@ interface IWaterfallItem {
 
 // 响应式数据
 const imageList = computed(() => {
-  console.log('自动更新：imageList', storageStore.image_list);
   const image_list = storageStore.image_list;
   const token = localCache.getCache(LOGIN_TOKEN);
   if (!token) {
@@ -47,17 +53,14 @@ const imageList = computed(() => {
   );
 });
 
-interface IFilterImageEmits {
-  orderBy: string;
-  orderDirection: string;
-}
-
 function handleChangeOrderType(config: IFilterImageEmits) {
-  storageStore.getImageListAction(config);
+  storageStore.resetCache().getImageListAction(config);
+  ElMessage.success('排序成功');
 }
 
 function handleChangeOrderDirection(config: IFilterImageEmits) {
-  storageStore.getImageListAction(config);
+  storageStore.resetCache().getImageListAction(config);
+  ElMessage.success('排序成功');
 }
 </script>
 
