@@ -32,8 +32,8 @@ const useSystemStore = defineStore('system', {
     user_list: [],
     total_count: 0,
 
-    image_list_byID: [],
-    total_image_count_byID: 0
+    image_list: [],
+    total_image_count: 0
   }),
   actions: {
     /**
@@ -174,10 +174,10 @@ const useSystemStore = defineStore('system', {
      */
     async getImageListAction(queryInfo: T_queryImageData = default_queryImage_condition) {
       try {
-        const image_list_byID = await getImageListData(queryInfo);
-        const { total_records, images } = image_list_byID.data;
-        this.image_list_byID = images;
-        this.total_image_count_byID = total_records;
+        const image_list = await getImageListData(queryInfo);
+        const { total_records, images } = image_list.data;
+        this.image_list = images;
+        this.total_image_count = total_records;
       } catch (error: any) {
         console.error('获取图片列表时发生错误:', error);
         ElMessage.error(error.message);

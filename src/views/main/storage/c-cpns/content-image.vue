@@ -40,37 +40,10 @@ systemStore.getImageListAction({
   image_download: 0
 });
 
-//const emit = defineEmits(['report', 'toggleLike']);
-
 // 响应式数据
 const imageList = computed(() => {
-  return systemStore.image_list_byID;
+  return systemStore.image_list;
 });
-// const imageUrlss = computed(() => {
-//   const a = [];
-//   for (const item of imageList.value) {
-//     a.push(
-//       `${BASE_URL}${item.image_path}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`
-//     );
-//   }
-//   return a;
-// });
-
-// // 计算属性
-// const cardWidth = computed(() => props.cardWidth || 266);
-
-// // 方法
-// const handleReport = (id: number) => {
-//   emit('report', id);
-// };
-
-// const toggleLike = (item: ImageItem) => {
-//   const newStatus = !item.isLiked;
-//   imageList.value = imageList.value.map((img) =>
-//     img.id === item.id ? { ...img, isLiked: newStatus } : img
-//   );
-//   emit('toggleLike', item.id, newStatus);
-// };
 </script>
 
 <style scoped lang="less">

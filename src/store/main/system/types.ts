@@ -90,8 +90,8 @@ export interface T_userSystemState {
   user_list: T_userInfo[];
   total_count: number;
 
-  image_list_byID: T_imageInfo[];
-  total_image_count_byID: number;
+  image_list: T_imageInfo[];
+  total_image_count: number;
 }
 
 /**

@@ -2,12 +2,12 @@ import useSystemStore from '@/store/main/system/system';
 import { storeToRefs } from 'pinia';
 
 const systemStore = useSystemStore();
-const { image_list_byID, total_image_count_byID } = storeToRefs(systemStore);
+const { image_list, total_image_count } = storeToRefs(systemStore);
 const contentConfig = {
   page_name: 'image_list',
   data: {
-    list: image_list_byID,
-    total_count: total_image_count_byID
+    list: image_list,
+    total_count: total_image_count
   },
   header: {
     title: '图片列表',
