@@ -1,81 +1,45 @@
 <template>
-  <div>
-    <!-- 图片列表 -->
-    <div class="image-list-container">
-      <div v-for="item in imageList" :key="item.image_id" class="image-card">
-        <!-- 图片容器 -->
-        <div>
-          <el-image
-            :src="`${BASE_URL}${item.image_path}?token=${localCache.getCache(LOGIN_TOKEN)}&t=${Date.now()}`"
-            loading="lazy"
-            fit="cover"
-            class="buAXlW"
-          >
-            <template #error>
-              <div class="image-error">加载失败</div>
-            </template>
-          </el-image>
+  <!-- 图片列表 -->
+  <Waterfall ref="waterfall" :list="props.imageList">
+    <template #default="{ item, url }">
+      <div
+        class="group overflow-hidden rounded-lg bg-gray-900 shadow-md transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600"
+        @click="handleClick(item)"
+      >
+        <div class="overflow-hidden">
+          <LazyImg
+            :url="url"
+            title="title"
+            :alt="item.name"
+            class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-110"
+            @load="imageLoad"
+            @error="imageError"
+            @success="imageSuccess"
+          />
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </Waterfall>
 </template>
 
 <script setup lang="ts">
-import { ElImage } from 'element-plus';
-import { computed } from 'vue';
-import { BASE_URL } from '@/service/config';
-import { localCache } from '@/utils/cache';
-import { LOGIN_TOKEN } from '@/global/constants';
-import useSystemStore from '@/store/main/system/system';
+import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
+import 'vue-waterfall-plugin-next/dist/style.css';
+import type { ViewCard } from 'vue-waterfall-plugin-next/dist/types/types/waterfall';
+import type { T_imageInfo } from '@/store/main/system/types';
 
-const systemStore = useSystemStore();
-systemStore.getImageListAction({
-  page: 1,
-  pageSize: 99,
-  image_name: '',
-  image_type: '',
-  image_format: '',
-  image_share: 0,
-  image_download: 0
-});
+const props = defineProps<{
+  imageList: { src: string; info: T_imageInfo }[];
+}>();
 
-// 响应式数据
-const imageList = computed(() => {
-  return systemStore.image_list;
-});
+
+
+function handleClick(item: ViewCard) {
+  console.log(item);
+}
+function imageLoad() {}
+function imageError() {}
+function imageSuccess() {}
 </script>
 
-<style scoped lang="less">
-.image-list-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  padding: 16px;
-
-  .image-card {
-    position: relative;
-    cursor: pointer;
-    border-radius: 8px;
-    overflow: visible;
-    transition: transform 0.2s ease;
-    width: 100%; /* 改为响应式宽度 */
-    aspect-ratio: 1 / 1; /* 建议添加宽高比 */
-
-    &:hover {
-      transform: translateY(-2px);
-
-      .action-buttons {
-        opacity: 1;
-      }
-    }
-    .buAXlW {
-      height: 100%; /* 改为继承父容器高度 */
-      width: 100%; /* 确保宽度填满 */
-      object-fit: cover;
-      transition: opacity 300ms;
-    }
-  }
-}
-</style>
+<style scoped lang="less"></style>

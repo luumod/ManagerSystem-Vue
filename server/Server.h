@@ -30,6 +30,11 @@ private:
 	void route_imageManagement();
 
 	/**
+	* 图片仓库
+	*/
+	void route_imageRepo();
+
+	/**
 	* 高级查询：
 	* 菜单管理
 	*/

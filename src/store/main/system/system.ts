@@ -177,6 +177,7 @@ const useSystemStore = defineStore('system', {
         const image_list = await getImageListData(queryInfo);
         const { total_records, images } = image_list.data;
         this.image_list = images;
+        debugger;
         this.total_image_count = total_records;
       } catch (error: any) {
         console.error('获取图片列表时发生错误:', error);

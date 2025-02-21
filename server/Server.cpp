@@ -402,6 +402,7 @@ Server::Server()
 	route_userLogin();
 	route_managerUserSystem();
 	route_imageManagement();
+	route_imageRepo();
 	route_advancedQuery();
 }
 
@@ -1587,6 +1588,94 @@ void Server::route_imageManagement()
 				.addHeader("Content-Length", QByteArray::number(file.size()))
 				.addHeader("Content-Disposition", "inline;  filename=" + file.fileName().toUtf8())
 				.send(responder);
+			return;
+		});
+}
+
+void Server::route_imageRepo()
+{
+	//用户图片获取：全部图片
+	checkCORS_OPTIONS(QString("/repo/list"));
+	m_server.route("/repo/list", QHttpServerRequest::Method::Post,
+		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+			CheckJsonParse(request, responder);
+
+			//校验参数
+			std::optional<QByteArray> token = CheckToken(request);
+			if (token.has_value()) { //token校验失败
+				resError(token.value(), responder);
+				return;
+			}
+
+			auto orderBy = jdom["orderBy"].toString();
+			auto orderDirection = jdom["orderDirection"].toString();
+			qDebug()<<"orderBy:"<<orderBy<<"orderDirection:"<<orderDirection;
+
+			QString filter = "";
+			if (orderBy != "default") {
+				 filter = QString("order by %1 %2").arg(orderBy).arg(orderDirection);
+			}
+			
+
+			//确保筛选后能得到正确的页数信息
+			SSqlConnectionWrap wrap;
+			QSqlQuery query(wrap.openConnection());
+//			query.prepare(QString("SELECT COUNT(*) as total FROM user_image where isDeleted=0 %2").arg(filter));
+//			if (!query.exec()) {
+//				resError(SResult::error(SResultCode::ServerSqlQueryError), responder);
+//				return;
+//			}
+//#if _DEBUG	
+//			qDebug() << "指定用户图片列表获取";
+//			qDebug() << query.lastQuery();
+//#endif
+//
+//			query.next();
+//			auto total_records = query.value("total").toInt(); //图片总数
+//			auto last_page = total_records / pageSize + (total_records % pageSize ? 1 : 0);
+//			if (page < 1 || page > last_page) {
+//				page = 1;
+//			}
+
+			//图片列表获取
+			QString sql = QString("SELECT * FROM user_image WHERE isDeleted=0 %1").arg(filter);
+			//sql += QString(" LIMIT %1,%2").arg((page - 1) * pageSize).arg(pageSize);
+			query.prepare(sql);
+			if (!query.exec()) {
+				resError(SResult::error(SResultCode::ServerSqlQueryError), responder);
+				return;
+			}
+#if _DEBUG	
+			qDebug() << query.lastQuery();
+#endif
+
+			QJsonArray jarray;
+			int i = 0;
+			while (query.next()) {
+				QJsonObject jobj;
+				jobj.insert("id", query.value("id").toInt());
+				jobj.insert("owner_id", query.value("owner_id").toInt());
+				jobj.insert("owner_name", query.value("owner_name").toString());
+				jobj.insert("image_path", query.value("image_path").toString());
+				jobj.insert("image_name", query.value("image_name").toString());
+				jobj.insert("image_size", query.value("image_size").toInt());
+				jobj.insert("image_format", query.value("image_format").toString());
+				jobj.insert("image_share", query.value("image_share").toInt());
+				jobj.insert("image_type", query.value("image_type").toString());
+				jobj.insert("image_download", query.value("image_download").toInt());
+				jobj.insert("image_ResolutionRatio", query.value("image_ResolutionRatio").toString());
+				jobj.insert("upload_time", query.value("upload_time").toString());
+				jobj.insert("description", query.value("description").toString());
+				jarray.append(jobj);
+			}
+
+			QJsonObject jobj;
+			jobj.insert("images", jarray);
+			/*jobj.insert("cur_page", page);
+			jobj.insert("page_size", pageSize);
+			jobj.insert("last_page", last_page);*
+			jobj.insert("total_records", total_records);*/
+			resSuccess(SResult::success(jobj), responder);
 			return;
 		});
 }
