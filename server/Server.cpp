@@ -352,6 +352,7 @@ Server::Server()
 	checkCORS_OPTIONS(QString("/register"));
 
 	checkCORS_OPTIONS(QString("/user/<arg>"));
+	checkCORS_OPTIONS(QString("/user/id/list"));
 	checkCORS_OPTIONS(QString("/user/list"));
 	checkCORS_OPTIONS(QString("/user/create"));
 	checkCORS_OPTIONS(QString("/users"));
@@ -359,6 +360,7 @@ Server::Server()
 	checkCORS_OPTIONS(QString("/public/images/avatar/<arg>"));
 
 	checkCORS_OPTIONS(QString("/image/list/<arg>"));
+	checkCORS_OPTIONS(QString("/image/list"));
 	checkCORS_OPTIONS(QString("/image/upload"));
 	checkCORS_OPTIONS(QString("/image/<arg>"));
 	checkCORS_OPTIONS(QString("/image/<arg>/upload"));
@@ -532,6 +534,35 @@ void Server::route_managerUserSystem()
 
 		resSuccess(SResult::success(recordToJson(query.record())), responder);
 		return;
+		});
+
+	//查询所有的id
+	m_server.route("/user/id/list", QHttpServerRequest::Method::Get,
+		[](const QHttpServerRequest& request, QHttpServerResponder&& responder) {
+			//校验参数
+			std::optional<QByteArray> token = CheckToken(request);
+			if (token.has_value()) { //token校验失败
+				resError(token.value(), responder);
+				return;
+			}
+			SSqlConnectionWrap wrap;
+			QSqlQuery query(wrap.openConnection());
+			QString sql = "SELECT * FROM user_info";
+			query.prepare(sql);
+			query.exec();
+			CheckSqlQuery(query, responder);
+
+	qDebug()<<"查询所有用户id";	
+	qDebug()<<query.lastQuery()<<'\n';
+
+			QJsonArray arr;
+			while (query.next()) {
+				arr.append(query.value("id").toString());
+			}
+			QJsonObject jobj;
+			jobj.insert("ids", arr);
+			resSuccess(SResult::success(jobj), responder);
+			return;
 		});
 	
 	//用户列表查询
@@ -1236,6 +1267,7 @@ void Server::route_imageManagement()
 
 		QString image_name = "";
 		if (uquery.queryItemValue("image_name").isEmpty()) {
+			//没有指定图片名称，则使用图片原始名称
 			image_name = QFileInfo(parse.filename()).baseName();
 		}
 		else {

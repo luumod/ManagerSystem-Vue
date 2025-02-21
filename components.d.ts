@@ -8,9 +8,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ElAside: typeof import('element-plus/es')['ElAside']
+    ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
+    ElButon: typeof import('element-plus/es')['ElButon']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCol: typeof import('element-plus/es')['ElCol']
@@ -47,6 +49,7 @@ declare module 'vue' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
+    ElText: typeof import('element-plus/es')['ElText']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     HeaderCrumb: typeof import('./src/components/main-header/c-cpns/header-crumb.vue')['default']
     HeaderInfo: typeof import('./src/components/main-header/c-cpns/header-info.vue')['default']
@@ -59,6 +62,8 @@ declare module 'vue' {
     PageSearch: typeof import('./src/components/page-search/page-search.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ShowAvatar: typeof import('./src/components/page-created/c-cpns/show-avatar.vue')['default']
+    ShowImage: typeof import('./src/components/page-created/c-cpns/show-image.vue')['default']
     UserContent: typeof import('./src/components/page-content/user-content.vue')['default']
     UserModalEdit: typeof import('./src/components/page-edit/user-modal-edit.vue')['default']
   }
