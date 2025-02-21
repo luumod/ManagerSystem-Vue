@@ -293,6 +293,7 @@ defineExpose({
 
 .table {
   margin: 4px;
+  display: flex;
 
   .el-table_cell {
     padding: 12px 0px;

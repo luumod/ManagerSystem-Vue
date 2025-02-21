@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import 'normalize.css'; //css重置样式
-import './assets/css/index.less'; //npm install less -D
+import './style.css'; //npm install less -D
 //import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 // 全局注册
 // import ElementPlus from 'element-plus';
@@ -25,6 +25,6 @@ import pinia from './store';
 // 自动注册
 const app = createApp(App);
 app.use(icons); //参数自动传递为app
-app.use(pinia); 
+app.use(pinia);
 app.use(router);
 app.mount('#app');
