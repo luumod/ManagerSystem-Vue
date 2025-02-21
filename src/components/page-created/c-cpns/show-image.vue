@@ -1,7 +1,11 @@
 <template>
   <div class="show-avatar">
     <div style="text-align: center">{{ props.title }}</div>
-    <div style="width: 80%; height: 75%; margin: 5px auto">
+
+    <input v-show="false" ref="nativeInputRef" type="file" @change="handleFileChange" />
+
+    <!-- 上传态与图片态分离 -->
+    <div v-if="!imageUrl" style="width: 80%; height: 75%; margin: 5px auto">
       <el-upload
         class="avatar-uploader"
         :action="props.uploadUrl"
@@ -12,18 +16,15 @@
         :show-file-list="false"
         :on-success="handleUploadSuccess"
       >
-        <el-image
-          ref="imageRef"
-          v-if="imageUrl"
-          :src="imageUrl"
-          :preview-src-list="[imageUrl]"
-          fit="cover"
-        />
-        <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+        <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
       </el-upload>
     </div>
-    <div v-if="file_data" style="text-align: center">
-      <el-button @click="handleViewOriginal">查看原图</el-button>
+    <div v-else>
+      <el-image ref="imageRef" :src="imageUrl" :preview-src-list="[imageUrl]" fit="cover" />
+      <div style="text-align: center">
+        <el-button @click="handleReloadImage">重新上传</el-button>
+        <el-button @click="handleViewOriginal">查看原图</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -31,7 +32,7 @@
 <script setup lang="ts" name="show-avatar">
 import { LOGIN_TOKEN } from '@/global/constants';
 import { localCache } from '@/utils/cache';
-import type { ImageInstance } from 'element-plus';
+import { ElMessage, ElUpload, type ImageInstance } from 'element-plus';
 import { ref } from 'vue';
 
 const imageUrl = ref('');
@@ -43,13 +44,40 @@ interface IProps {
 }
 
 const props = defineProps<IProps>();
-const emits = defineEmits(['handleUploadSuccess']);
-
+const nativeInputRef = ref(); //模拟原生input元素的点击事件
 const imageRef = ref<ImageInstance>();
 
+//通知父组件图片的变化
+const emits = defineEmits(['handleUploadSuccess']);
+
+/**
+ * 点击重新上传图片
+ */
+function handleReloadImage() {
+  nativeInputRef.value?.click();
+}
+
+/**
+ * 点击显示预览图片
+ */
 function handleViewOriginal() {
   imageRef.value?.showPreview();
 }
+
+/**
+ * 处理type="file"的原生input元素的上传
+ * @param event 原生事件对象
+ */
+const handleFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files ? target.files[0] : null;
+  if (file) {
+    file_data.value = file;
+    imageUrl.value = URL.createObjectURL(file);
+    emits('handleUploadSuccess', file_data.value);
+    ElMessage.success('切换图片');
+  }
+};
 
 /**
  * 处理上传头像/图片成功
@@ -72,7 +100,6 @@ function handleUploadSuccess(response: any, uploadFile: any) {
 .show-avatar {
   position: relative;
   overflow: hidden;
-  cursor: pointer;
   width: 320px;
   min-width: 320px;
   height: 320px;
