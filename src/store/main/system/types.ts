@@ -103,21 +103,21 @@ export interface T_queryCondition {
 }
 
 export interface T_queryUserData extends T_queryCondition {
-  user_account: string;
-  user_name: string;
-  mobile: string;
-  email: string;
-  isEnable: number;
-  gender: number;
+  user_account?: string;
+  user_name?: string;
+  mobile?: string;
+  email?: string;
+  isEnable?: number;
+  gender?: number;
 }
 
 export interface T_queryImageData extends T_queryCondition {
   owner_id?: number;
-  image_name: string;
-  image_type: string;
-  image_format: string;
-  image_share: number;
-  image_download: number;
+  image_name?: string;
+  image_type?: string;
+  image_format?: string;
+  image_share?: number;
+  image_download?: number;
 }
 
 const default_query_condition: T_queryUserData = {

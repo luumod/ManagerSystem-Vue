@@ -60,6 +60,12 @@ export function checkUserAccount(account: string) {
   });
 }
 
+export function getUserIdList() {
+  return hyRequest.get({
+    url: `/user/id/list`
+  });
+}
+
 /**
  * 修改用户的基本信息
  * @param id 用户id

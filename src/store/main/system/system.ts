@@ -7,6 +7,7 @@ import {
   deleteImageData,
   deleteUserData,
   getImageListData,
+  getUserIdList,
   getUserListData,
   updateImageData,
   updateImageInfoData,
@@ -153,6 +154,16 @@ const useSystemStore = defineStore('system', {
         return true;
       } catch (error: any) {
         console.error('检查用户账号时发生错误:', error);
+        throw error;
+      }
+    },
+
+    async queryUserIdList() {
+      try {
+        const ids = await getUserIdList();
+        return ids.data.ids ?? [];
+      } catch (error: any) {
+        console.error('返回用户ids时发生错误:', error);
         throw error;
       }
     },

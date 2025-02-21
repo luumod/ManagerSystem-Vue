@@ -1,8 +1,9 @@
-import { T_pageType } from '@/service/main/system/types';
+import { T_pageType } from '@/store/main/system/types';
 
 const createdConfig = {
   pageType: T_pageType.PAGE_USER,
-  dialogWidth: '50%',
+  imageAreaTitle: '上传头像',
+  dialogWidth: '70%',
   pageName: '新建用户',
   labelWidth: 100,
   formItems: [

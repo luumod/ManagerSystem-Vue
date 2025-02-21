@@ -24,7 +24,7 @@
               :label-width="props.createdConfig.labelWidth ?? '80px'"
               status-icon
             >
-              <el-row :gutter="200">
+              <el-row>
                 <el-col :span="8">
                   <template v-for="item in props.createdConfig.formItems" :key="item.prop">
                     <template
@@ -34,56 +34,29 @@
                     >
                       <el-form-item :label="item.label" :prop="item.prop">
                         <!-- 头像区域 -->
-                        <template v-if="item.type === 'avatar'">
-                          <div class="avatar-wrapper">
-                            <span class="title">点击上传头像</span>
-                            <el-upload
-                              class="avatar-uploader"
-                              :action="uploadUrl"
-                              :headers="{
-                                Authorization: `Bearer ${localCache.getCache(LOGIN_TOKEN)}`
-                              }"
-                              :auto-upload="true"
-                              :show-file-list="false"
-                              :on-success="handleUploadSuccess"
-                            >
-                              <el-avatar v-if="imageUrl" :src="imageUrl" fit="cover" :size="120" />
-                              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-                            </el-upload>
-                          </div>
-                        </template>
-
-                        <!-- 图片区域 -->
-                        <template v-if="item.type === 'image'">
-                          <div class="image-wrapper">
-                            <el-upload
-                              class="avatar-uploader"
-                              :action="uploadUrl"
-                              :headers="{
-                                Authorization: `Bearer ${localCache.getCache(LOGIN_TOKEN)}`
-                              }"
-                              :auto-upload="true"
-                              :show-file-list="false"
-                              :on-success="handleUploadSuccess"
-                            >
-                              <el-image
-                                v-if="imageUrl"
-                                :src="imageUrl"
-                                class="avatar"
-                                fit="cover"
-                              />
-                              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-                            </el-upload>
-                          </div>
+                        <template v-if="item.type === 'avatar' || item.type === 'image'">
+                          <show-image
+                            :uploadUrl="uploadUrl"
+                            :title="props.createdConfig.imageAreaTitle"
+                            @handleUploadSuccess="receiveFileData"
+                          ></show-image>
                         </template>
                       </el-form-item>
                     </template>
                   </template>
                 </el-col>
 
-                <el-col :span="16">
+                <el-col
+                  :span="16"
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    flex-wrap: wrap;
+                    align-content: center;
+                  "
+                >
                   <template v-for="item in props.createdConfig.formItems" :key="item.prop">
-                    <template v-if="item.order === 'first' && item.type === 'input'">
+                    <template v-if="item.order === 'first'">
                       <el-form-item :label="item.label" :prop="item.prop">
                         <!-- 基础输入型组件 -->
                         <template v-if="item.type === 'input'">
@@ -128,72 +101,74 @@
               status-icon
               :label-width="props.createdConfig.labelWidth ?? '80px'"
             >
-              <el-row :gutter="60">
-                <template v-for="item in props.createdConfig.formItems" :key="item.prop">
-                  <template
-                    v-if="item.order === 'second' && item.type != 'avatar' && item.type != 'image'"
+              <template v-for="item in props.createdConfig.formItems" :key="item.prop">
+                <template
+                  v-if="item.order === 'second' && item.type != 'avatar' && item.type != 'image'"
+                >
+                  <el-form-item
+                    :label="item.label"
+                    :prop="item.prop"
+                    style="width: 60%; margin-bottom: 30px"
                   >
-                    <el-col :span="12">
-                      <el-form-item :label="item.label" :prop="item.prop">
-                        <!-- 少选型组件 -->
-                        <template v-if="item.type === 'radio'">
-                          <el-radio-group v-model="formData[item.prop]">
-                            <template v-for="option in item.options" :key="option.value">
-                              <el-radio :value="option.value">{{ option.label }}</el-radio>
-                            </template>
-                          </el-radio-group>
+                    <!-- 少选型组件 -->
+                    <template v-if="item.type === 'radio'">
+                      <el-radio-group v-model="formData[item.prop]">
+                        <template v-for="option in item.options" :key="option.value">
+                          <el-radio :value="option.value">{{ option.label }}</el-radio>
                         </template>
+                      </el-radio-group>
+                    </template>
 
-                        <!-- 输入型组件 -->
-                        <template v-if="item.type === 'input'">
-                          <el-input
-                            v-model="formData[item.prop]"
-                            :placeholder="item.placeholder"
-                            :readonly="item.read_only"
-                            :class="item.read_only ? 'readonly-item' : ''"
-                          />
-                        </template>
+                    <!-- 输入型组件 -->
+                    <template v-if="item.type === 'input'">
+                      <el-input
+                        v-model="formData[item.prop]"
+                        :placeholder="item.placeholder"
+                        :readonly="item.read_only"
+                        :class="item.read_only ? 'readonly-item' : ''"
+                      />
+                    </template>
 
-                        <!-- 多选型组件 -->
-                        <template v-else-if="item.type === 'select'">
-                          <el-select
-                            v-model="formData[item.prop]"
-                            :placeholder="item.placeholder"
-                            style="width: 100%"
-                          >
-                            <el-option
-                              v-for="option in item.options"
-                              :key="option.value"
-                              :label="option.label"
-                              :value="option.value"
-                            />
-                          </el-select>
-                        </template>
+                    <!-- 多选型组件 -->
+                    <template v-else-if="item.type === 'select'">
+                      <el-select
+                        v-model="formData[item.prop]"
+                        :placeholder="item.placeholder"
+                        style="width: 100%"
+                      >
+                        <el-option
+                          v-for="option in item.options"
+                          :key="option.value"
+                          :label="option.label"
+                          :value="option.value"
+                        />
+                      </el-select>
+                    </template>
 
-                        <!-- 日期型组件 -->
-                        <template v-else-if="item.type === 'picker'">
-                          <el-date-picker
-                            v-model="formData[item.prop]"
-                            type="datetime"
-                            :disabled="true"
-                            :placeholder="item.placeholder"
-                          />
-                        </template>
+                    <!-- 日期型组件 -->
+                    <template v-else-if="item.type === 'picker'">
+                      <el-date-picker
+                        v-model="formData[item.prop]"
+                        type="datetime"
+                        :disabled="true"
+                        :placeholder="item.placeholder"
+                      />
+                    </template>
 
-                        <!-- 文本域 -->
-                        <template v-else-if="item.type === 'textarea'">
-                          <el-input
-                            v-model="formData[item.prop]"
-                            type="textarea"
-                            :rows="4"
-                            :placeholder="item.placeholder"
-                          />
-                        </template>
-                      </el-form-item>
-                    </el-col>
-                  </template>
+                    <!-- 文本域 -->
+                    <template v-else-if="item.type === 'textarea'">
+                      <el-input
+                        v-model="formData[item.prop]"
+                        type="textarea"
+                        :placeholder="item.placeholder"
+                        autosize
+                        maxlength="300"
+                        show-word-limit
+                      />
+                    </template>
+                  </el-form-item>
                 </template>
-              </el-row>
+              </template>
             </el-form>
           </el-tab-pane>
         </el-tabs>
@@ -224,22 +199,22 @@
 </template>
 
 <script setup lang="ts" name="user-modal">
-import { LOGIN_TOKEN } from '@/global/constants';
 import { BASE_URL } from '@/service/config';
 import useSystemStore from '@/store/main/system/system';
-import { T_pageType } from '@/service/main/system/types';
-import { localCache } from '@/utils/cache';
+import { T_pageType } from '@/store/main/system/types';
 import { ElForm, ElMessage, type FormInstance, type FormRules } from 'element-plus';
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import {
   generateRandomAccount,
   generateRandomEmail,
   generateRandomMobile,
   generateRandomUsername
 } from '@/global/random-gen';
+import ShowImage from './c-cpns/show-image.vue';
 
 interface IProps {
   createdConfig: {
+    imageAreaTitle: string;
     pageType: T_pageType;
     dialogWidth?: string;
     pageName: string;
@@ -257,8 +232,7 @@ for (const item of props.createdConfig.formItems) {
 const formData = reactive(initialForm);
 const page = props.createdConfig.pageType;
 
-const file_data = ref<File>();
-const imageUrl = ref('');
+//const imageUrl = ref('');
 const uploadUrl = ref('');
 
 const show_dot_1 = ref(false);
@@ -275,6 +249,7 @@ const systemStore = useSystemStore();
 const formRef_first = ref<FormInstance>();
 const formRef_second = ref<FormInstance>();
 
+const file_data = ref<File>();
 //校验账号
 const validateAccount = (rule: any, value: string, callback: any) => {
   if (!value) {
@@ -296,6 +271,21 @@ const validateAccount = (rule: any, value: string, callback: any) => {
     });
 };
 
+//校验用户ID
+const validateId = (rule: any, input_value: string, callback: any) => {
+  if (!input_value) {
+    return callback(new Error('请输入图片所有者ID！'));
+  }
+
+  //检查账号的唯一性
+  //如果input_value存在于ids中，说明输入的ID是正确的
+  if (ids.value.some((item) => item.value === input_value)) {
+    callback();
+  } else {
+    return callback(new Error('请输入正确的图片所有者ID！'));
+  }
+};
+
 //检查密码
 const validatePassword = (rule: any, value: string, callback: any) => {
   formData.password = '123456'; //默认密码
@@ -304,6 +294,7 @@ const validatePassword = (rule: any, value: string, callback: any) => {
 
 //校验规则
 const accountRules: FormRules = {
+  //新建用户
   user_account: [{ required: true, validator: validateAccount, trigger: 'blur' }],
   user_name: [{ message: '请输入用户名', trigger: 'blur' }],
   password: [
@@ -318,17 +309,38 @@ const accountRules: FormRules = {
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
   ],
-  gender: [{ required: true, message: '请选择性别', trigger: 'change' }]
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
+
+  //新建图片
+  owner_id: [{ required: true, validator: validateId, trigger: 'change' }]
 };
 
+interface IIds {
+  value: string;
+}
+
+const ids = ref<IIds[]>([]);
 /**
  * 点击了【新建】，弹出新建数据行的弹窗
  */
-function showCreatedNewUserDlg() {
+async function showCreatedNewUserDlg() {
   dialogVisible.value = true;
   activeName.value = tabsName.value[0];
   uploadUrl.value = BASE_URL + `/fake_upload`; //占位
 }
+
+onMounted(async () => {
+  try {
+    const ids_data = await systemStore.queryUserIdList();
+    // 确保接口返回的是数组格式，否则强制转换或使用默认值
+    for (const item of ids_data) {
+      ids.value.push({ value: item });
+    }
+  } catch (error) {
+    console.error('Failed to fetch user IDs:', error);
+    ids.value = []; // 出错时保持数组类型
+  }
+});
 
 /**
  * 随机生成符合格式的数据
@@ -359,22 +371,19 @@ function handleGenerateRandomAll() {
   }
 }
 
-/**
- * 处理上传头像/图片成功
- * @param response 服务器返回的响应
- * @param uploadFile 上传的文件对象
- */
-function handleUploadSuccess(response: any, uploadFile: any) {
-  //主要是获取uploadFile
-  if (response.code === 0) {
-    //1. 让图片显示出来
-    imageUrl.value = URL.createObjectURL(uploadFile.raw!);
-
-    //2. 保存图片数据
-    file_data.value = uploadFile.raw!;
-    //name: 文件名，在上传图片中用到，上传头像无需用到
-  }
-}
+// let timeout: ReturnType<typeof setTimeout>;
+// const querySearchAsync = (queryString: string, cb: (arg: any) => void) => {
+//   const results = queryString ? ids.value.filter(createFilter(queryString)) : ids.value;
+//   clearTimeout(timeout);
+//   timeout = setTimeout(() => {
+//     cb(results);
+//   }, 3000 * Math.random());
+// };
+// const createFilter = (queryString: string) => {
+//   return (userId: IIds) => {
+//     return userId.value.indexOf(queryString) === 0;
+//   };
+// };
 
 /**
  * 检查每一子页的输入信息的合法性，并且会弹出一个红色点点来提示用户某一页输入信息有误
@@ -424,6 +433,10 @@ function handlePrevInfoPage() {
   }
 }
 
+function receiveFileData(file: File) {
+  file_data.value = file;
+}
+
 /**
  * 点击提交，校验输入信息，然后发创建请求
  * @param formEl_first 上一页的表单实例
@@ -443,6 +456,9 @@ async function handleSubmit(
 
   let action: Promise<any>;
   let successMessage: string;
+  if (!file_data.value) {
+    ElMessage.info('未选择头像！');
+  }
 
   if (page === T_pageType.PAGE_USER) {
     action = systemStore.createNewUserAction(formData, file_data.value!);
@@ -472,7 +488,7 @@ defineExpose({ showCreatedNewUserDlg });
 
 <style scoped lang="less">
 .form {
-  padding: 10px;
+  height: 400px;
   margin-top: 10px;
 
   .readonly-item {
@@ -485,65 +501,11 @@ defineExpose({ showCreatedNewUserDlg });
     margin-left: 6px;
   }
 
-  .avatar-item {
-    display: flex;
-    align-items: center;
-    .el-avatar {
-      margin-right: 15px;
+  .el-col-16 {
+    .el-form-item {
+      margin-bottom: 30px;
     }
   }
-  :deep(.el-textarea__inner) {
-    height: 150px;
-  }
-
-  .avatar-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding-top: 0px;
-    margin-top: 0px;
-    .title {
-      font-size: 16px;
-      color: var(--el-text-color-secondary);
-    }
-    .avatar-uploader .avatar {
-      width: 100%;
-      height: 80%;
-      display: block;
-    }
-    .el-icon.avatar-uploader-icon {
-      font-size: 28px;
-      color: #8c939d;
-      width: 178px;
-      height: 178px;
-      text-align: center;
-    }
-  }
-  :global(.el-dialog__footer) {
-    padding-top: 0px;
-  }
-}
-
-.left-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-right: 20px;
-  border-right: 1px solid #eee;
-}
-
-.upload-btn {
-  text-align: center;
-}
-
-.image-wrapper {
-  margin-top: 84px;
-  margin-left: 2px;
-}
-
-.right-panel {
-  padding-left: 20px;
 }
 
 .footer {
