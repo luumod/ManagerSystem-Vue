@@ -62,6 +62,8 @@ const props = defineProps<{
 const waterfall = ref(null);
 const v_loading = ref(true);
 
+const emit = defineEmits(['clickCard']);
+
 const options = reactive({
   // 唯一key值
   rowKey: 'image_list.image_id',
@@ -127,7 +129,7 @@ function afterRender() {
 }
 
 function handleClick(item: ViewCard) {
-  console.log(item);
+  emit('clickCard', item);
 }
 function imageLoad() {}
 function imageError() {}

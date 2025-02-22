@@ -5,13 +5,16 @@
       @changeOrderDirection="handleChangeOrderDirection"
       @reload="handleReload"
     ></filter-image>
-    <content-image :image_list="imageList"></content-image>
+    <content-image :image_list="imageList" @click-card="handleOpenImage"></content-image>
+
+    <show-image ref="showImage"></show-image>
   </div>
 </template>
 
 <script setup lang="ts" name="storage">
 import FilterImage from './c-cpns/filter-image.vue';
 import ContentImage from './c-cpns/content-image.vue';
+import ShowImage from './c-cpns/show-image.vue';
 import useStorageStore from '@/store/storage/storage';
 import { computed, onMounted, ref } from 'vue';
 import { localCache } from '@/utils/cache';
@@ -19,9 +22,10 @@ import { LOGIN_TOKEN } from '@/global/constants';
 import type { IFilterImageEmits } from '@/store/storage/types';
 import { ElMessage } from 'element-plus';
 import { BASE_URL } from '@/service/config';
+import type { T_imageInfo } from '@/store/main/system/types';
 
 const current_config = ref();
-
+const showImage = ref<InstanceType<typeof ShowImage>>();
 const storageStore = useStorageStore();
 onMounted(() => {
   // 超过5分钟才重新请求
@@ -64,6 +68,10 @@ function handleChangeOrderDirection(config: IFilterImageEmits) {
 function handleReload() {
   storageStore.resetCache().getImageListAction(current_config.value);
   ElMessage.success('重新加载');
+}
+
+function handleOpenImage(item: T_imageInfo) {
+  showImage.value?.openFullScreenDialog(item);
 }
 </script>
 
