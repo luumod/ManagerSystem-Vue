@@ -17,6 +17,9 @@ const useStorageStore = defineStore(
 
     const store = useStorageStore();
 
+    /**
+     * 清除缓存，可链式后接一个请求操作
+     */
     function resetCache() {
       image_list.value = [];
       lastFetchTime.value = 0;
@@ -24,18 +27,22 @@ const useStorageStore = defineStore(
       return store;
     }
 
+    /**
+     * 检查是否有缓存
+     */
     function cache() {
-      //不需要重新请求数据
       return Date.now() - lastFetchTime.value < 300000 && image_list.value.length > 0;
     }
 
+    /**
+     * 获取图片列表
+     * @param query_params 查询条件（排序类型与方向）
+     */
     async function getImageListAction(query_params: IFilterImageEmits) {
-      // 添加缓存有效期判断（例如5分钟）
       if (cache()) {
         return;
       }
 
-      console.log('getImageListAction');
       try {
         const response = await getImageListData(query_params);
         const { images } = response.data;

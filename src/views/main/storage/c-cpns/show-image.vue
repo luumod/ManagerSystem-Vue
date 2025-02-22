@@ -80,7 +80,7 @@
                 <dt>收藏数</dt>
                 <dd>TODO</dd>
                 <dt>链接</dt>
-                <dd><el-input v-model="image_path" size="small" /></dd>
+                <dd><el-input v-model="preview_image_list[0]" size="small" /></dd>
               </dl>
             </el-collapse-item>
 
@@ -152,12 +152,19 @@
       </el-scrollbar>
 
       <!-- 右侧固定区域 -->
-      <div class="h-full w-4/5 overflow-hidden" @wheel.prevent>
+      <div class="h-full w-4/5 overflow-hidden">
+        <!-- 显示图片预览的窗口，默认隐藏 -->
         <el-image
+          v-show="is_preview"
           ref="image_ref"
+          :preview-src-list="preview_image_list"
+          @close="is_preview = false"
+        >
+          <template #error>. </template>
+        </el-image>
+        <el-image
           class="relative left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform"
           :src="current_image_info?.image_path"
-          :preview-src-list="[current_image_info?.image_path]"
         ></el-image>
       </div>
     </div>
@@ -170,20 +177,28 @@ import { formatUTC, getImageSize } from '@/utils/format';
 import type { ImageInstance } from 'element-plus';
 import { computed, ref } from 'vue';
 
-const dialogVisible = ref(false);
 const current_image_info = ref<T_imageInfo>();
-const image_path = computed(() => current_image_info.value?.image_path);
+const is_preview = ref(false);
+const dialogVisible = ref(false);
 const activeNames = ref(['1']);
 const image_ref = ref<ImageInstance>();
+const preview_image_list = computed(() => [current_image_info.value?.image_path]);
 
+/**
+ * 打开全屏显示图片的对话框
+ * @param image_info 图片信息
+ */
 function openFullScreenDialog(image_info: T_imageInfo) {
   dialogVisible.value = true;
   current_image_info.value = image_info;
-  console.log(current_image_info.value);
 }
 
+/**
+ * 全屏显示图片
+ */
 function handleImageFullScreen() {
-  image_ref?.value?.showPreview();
+  image_ref.value!.showPreview();
+  is_preview.value = true;
 }
 
 defineExpose({
