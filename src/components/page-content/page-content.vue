@@ -90,9 +90,10 @@ import {
   type T_queryImageData,
   type T_queryUserData
 } from '@/store/main/system/types';
+import { localCache } from '@/utils/cache';
 import { formatUTC } from '@/utils/format';
 import { ElMessage } from 'element-plus';
-import { computed, ref, type Ref } from 'vue';
+import { computed, onMounted, ref, watch, type Ref } from 'vue';
 
 interface IProps {
   contentConfig: {
@@ -107,8 +108,8 @@ interface IProps {
     };
     propsList: any[];
     page: {
-      page_start: number;
-      page_size: number;
+      page_start: number; //默认开始页
+      page_size: number; //默认页尺寸
       page_list: number[];
     };
   };
@@ -124,8 +125,21 @@ const total_count = computed(() => props.contentConfig.data.total_count.value);
 const multipleSelection = ref<any[]>();
 
 //数据
-const currentPage = ref();
-const pageSize = ref(props.contentConfig.page.page_size);
+const currentPage = ref(
+  localCache.getCache(props.contentConfig.page_name + '_currentPage') ??
+    props.contentConfig.page.page_start
+);
+const pageSize = ref(
+  localCache.getCache(props.contentConfig.page_name + '_pageSize') ??
+    props.contentConfig.page.page_size
+);
+
+watch(currentPage, (newPage) => {
+  localCache.setCache(props.contentConfig.page_name + '_currentPage', newPage);
+});
+watch(pageSize, (newSize) => {
+  localCache.setCache(props.contentConfig.page_name + '_pageSize', newSize);
+});
 
 const emit = defineEmits([
   'changePage',
@@ -139,11 +153,17 @@ const emit = defineEmits([
 
 //1. 发起action，请求user_list数据
 const systemStore = useSystemStore();
-if (props.contentConfig.page_name == 'user_list') {
-  fetchUserListData();
-} else if (props.contentConfig.page_name == 'image_list') {
-  fetchImageListData();
-}
+onMounted(() => {
+  if (props.contentConfig.page_name == 'user_list') {
+    if (!systemStore.cacheUser()) {
+      fetchUserListData();
+    }
+  } else if (props.contentConfig.page_name == 'image_list') {
+    if (!systemStore.cacheImage()) {
+      fetchImageListData();
+    }
+  }
+});
 
 /**
  * 选中的多条用户数据行

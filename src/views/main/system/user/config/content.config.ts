@@ -2,7 +2,8 @@ import useSystemStore from '@/store/main/system/system';
 import { storeToRefs } from 'pinia';
 
 const systemStore = useSystemStore();
-const { user_list, total_count } = storeToRefs(systemStore);
+//获取响应式数据
+const { user_list, total_count } = storeToRefs(systemStore); //不能直接 =，否则失去响应式
 const contentConfig = {
   page_name: 'user_list',
   data: {

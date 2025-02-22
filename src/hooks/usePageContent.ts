@@ -40,11 +40,13 @@ function usePageContent(conditionRef: Ref<any>) {
    * 改变每页显示条数会发送请求，按新的每页显示条数查询用户列表（可满足查询条件）
    * @param pageSize 每页显示条数
    */
-  function onChangePageSize(page: number) {
-    conditionRef.value.page = page;
+  function onChangePageSize(size: number) {
+    debugger;
+    conditionRef.value.pageSize = size;
     contentRef.value?.fetchUserListData(conditionRef.value);
   }
   function onChangePageSizeImage(pageSize: number) {
+    debugger;
     conditionRef.value.pageSize = pageSize;
     contentRef.value?.fetchImageListData(conditionRef.value);
   }
