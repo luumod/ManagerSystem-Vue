@@ -20,6 +20,7 @@
           />
         </el-select>
         <el-button :icon="currentIcon" @click="handleChangeState" />
+        <el-button type="primary" @click="handleReload">重新加载</el-button>
       </div>
     </div>
   </div>
@@ -47,7 +48,7 @@ const current_direction = ref(directions[storageStore.sort.dir]);
 const icons = ['ArrowUp', 'ArrowDown'];
 const currentIcon = ref(icons[storageStore.sort.dir]);
 
-const emit = defineEmits(['changeOrderType', 'changeOrderDirection']);
+const emit = defineEmits(['changeOrderType', 'changeOrderDirection','reload']);
 
 function handleChangeState() {
   //1. 图标改变
@@ -73,6 +74,11 @@ function handleChangeOption(val: number) {
   //2. 发送事件
   emit('changeOrderType', { orderBy: current_type.value, orderDirection: current_direction.value });
 }
+
+function handleReload(){
+  emit('reload');
+}
+
 </script>
 
 <style scoped>

@@ -67,4 +67,7 @@ declare module 'vue' {
     UserContent: typeof import('./src/components/page-content/user-content.vue')['default']
     UserModalEdit: typeof import('./src/components/page-edit/user-modal-edit.vue')['default']
   }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
+  }
 }
