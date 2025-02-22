@@ -62,4 +62,5 @@ const { onClickedSearch, onClickedReset } = usePageSearch(contentRef, userCondit
   border-radius: 10px;
   overflow: hidden;
 }
+
 </style>
