@@ -1,10 +1,10 @@
 <template>
-  <div class="main-content">
+  <div class="main-canvas">
     <canvas ref="canvasRef" class="worker-canvas"></canvas>
   </div>
 </template>
 
-<script setup lang="ts" name="main-content">
+<script setup lang="ts" name="main-canvas">
 import { onMounted, onUnmounted, ref } from 'vue';
 
 //画布实例
@@ -26,8 +26,6 @@ const currentFile = ref<File | null>(null);
 
 // 容器尺寸
 const containerRect = ref<DOMRect>();
-
-
 
 onMounted(() => {
   window.addEventListener('resize', handleResize);
@@ -179,7 +177,7 @@ function drawImage() {
   }
   const canvas = canvasRef.value;
 
-  //main-content的窗口尺寸
+  //main-canvas的窗口尺寸
   const container = canvasRef.value.parentElement as HTMLElement;
   if (!container) {
     return;
@@ -209,12 +207,12 @@ defineExpose({
 </script>
 
 <style scoped lang="less">
-.main-content {
+.main-canvas {
   width: 100%;
   height: 100%;
   overflow: hidden;
 
-  background-image: url('https://th.bing.com/th/id/OIP.RsjbGdFO6ikEgOIZL2QecgHaE8?rs=1&pid=ImgDetMain');
+  background-image: url('../../../../assets/img/bg-canvas.jpg');
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;

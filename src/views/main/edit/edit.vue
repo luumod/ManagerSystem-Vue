@@ -13,7 +13,7 @@
           ></drawer-wrapper>
         </el-header>
         <el-main>
-          <main-content ref="mainContentRef"></main-content>
+          <main-canvas ref="mainCanvasRef"></main-canvas>
         </el-main>
       </el-container>
       <el-aside width="300px">
@@ -27,11 +27,11 @@
 import cv from 'opencv-ts';
 import { ref } from 'vue';
 import NavigationBar from './c-cpns/navigation-bar.vue';
-import MainContent from './c-cpns/main-content.vue';
+import MainCanvas from './c-cpns/main-canvas.vue';
 import SiderBar from './c-cpns/sider-bar.vue';
 import DrawerWrapper from './c-cpns/drawer-wrapper.vue';
 
-const mainContentRef = ref<InstanceType<typeof MainContent> | null>(null);
+const mainCanvasRef = ref<InstanceType<typeof MainCanvas> | null>(null);
 const imageRef = ref<HTMLImageElement | null>(null);
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const navi_curr_idx = ref(0);
@@ -47,7 +47,7 @@ function handleCloseDrawer() {
 }
 
 function handleUploadSuccess(file: File) {
-  mainContentRef.value?.setCanvas(file);
+  mainCanvasRef.value?.setCanvas(file);
 }
 
 function handleFileChange(event: any) {
