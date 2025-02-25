@@ -7,6 +7,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BHcard: typeof import('./src/components/base-cpns/b-hcard.vue')['default']
+    BSearch: typeof import('./src/components/base-cpns/b-search.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -15,6 +17,8 @@ declare module 'vue' {
     ElButon: typeof import('element-plus/es')['ElButon']
     ElButtom: typeof import('element-plus/es')['ElButtom']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCarousel: typeof import('element-plus/es')['ElCarousel']
+    ElCarouselItem: typeof import('element-plus/es')['ElCarouselItem']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElCollapse: typeof import('element-plus/es')['ElCollapse']
@@ -72,6 +76,7 @@ declare module 'vue' {
     PageSearch: typeof import('./src/components/page-search/page-search.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Search: typeof import('./src/components/base-cpns/search.vue')['default']
     ShowAvatar: typeof import('./src/components/page-created/c-cpns/show-avatar.vue')['default']
     ShowImage: typeof import('./src/components/page-created/c-cpns/show-image.vue')['default']
     UserContent: typeof import('./src/components/page-content/user-content.vue')['default']

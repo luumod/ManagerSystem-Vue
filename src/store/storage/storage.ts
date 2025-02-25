@@ -39,6 +39,7 @@ const useStorageStore = defineStore(
      * @param query_params 查询条件（排序类型与方向）
      */
     async function getImageListAction(query_params: IFilterImageEmits) {
+      debugger;
       if (cache()) {
         return;
       }
