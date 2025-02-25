@@ -1,12 +1,12 @@
 <template>
   <div class="news">
-    <h2>news</h2>
+    <h1>news</h1>
   </div>
 </template>
 
-<script setup lang="ts" name="news"></script>
+<script setup lang="ts"></script>
 
-<style scoped>
+<style lang="less" scoped>
 .news {
   color: red;
 }
