@@ -22,14 +22,23 @@
 </template>
 
 <script setup lang="ts" name="navigation-bar">
+import { ref } from 'vue';
 import eButton from './e-button.vue';
 
 const emit = defineEmits(['clickNavigationButton']);
-
+const isCanClick = ref(false);
 function handleClickButton(id: number) {
+  if (!isCanClick.value) {
+    console.log('can not click button,please upload image！');
+    return;
+  }
   console.log(`click button ${id}`);
   emit('clickNavigationButton', id);
 }
+
+defineExpose({
+  isCanClick
+});
 </script>
 
 <style scoped lang="less">

@@ -5,6 +5,8 @@
 </template>
 
 <script setup lang="ts" name="main-canvas">
+import emitter from '@/utils/emitter';
+import cv from 'opencv-ts';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 //画布实例
@@ -14,13 +16,14 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 const currentScale = ref<number>(1);
 
 //偏移：拖拽
-const offset = ref({ x: 0, y: 0 });
+//const offset = ref({ x: 0, y: 0 });
 
 //鼠标拖拽的位置坐标
-const dragStart = ref<{ x: number; y: number } | null>(null);
+//const dragStart = ref<{ x: number; y: number } | null>(null);
 
 //图片数据
-let imgInstance: HTMLImageElement | null = null;
+let imgInstance: HTMLImageElement;
+
 //图片文件
 const currentFile = ref<File | null>(null);
 
@@ -40,10 +43,10 @@ onMounted(() => {
   canvas.addEventListener('wheel', handleWheel, { passive: false });
 
   // 可选：添加拖拽平移功能
-  canvas.addEventListener('mousedown', startDrag);
-  canvas.addEventListener('mousemove', handleDrag);
-  canvas.addEventListener('mouseup', endDrag);
-  canvas.addEventListener('mouseleave', endDrag);
+  // canvas.addEventListener('mousedown', startDrag);
+  // canvas.addEventListener('mousemove', handleDrag);
+  // canvas.addEventListener('mouseup', endDrag);
+  // canvas.addEventListener('mouseleave', endDrag);
 });
 
 onUnmounted(() => {
@@ -52,9 +55,9 @@ onUnmounted(() => {
   if (!canvasRef.value) return;
   const canvas = canvasRef.value;
   canvas.removeEventListener('wheel', handleWheel);
-  canvas.removeEventListener('mousedown', startDrag);
-  canvas.removeEventListener('mousemove', handleDrag);
-  canvas.removeEventListener('mouseup', endDrag);
+  // canvas.removeEventListener('mousedown', startDrag);
+  // canvas.removeEventListener('mousemove', handleDrag);
+  // canvas.removeEventListener('mouseup', endDrag);
 });
 
 /**
@@ -88,16 +91,16 @@ function handleWheel(e: WheelEvent) {
   currentScale.value = newScale;
 
   //2. 获取鼠标在canvas中的坐标
-  const rect = canvasRef.value!.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
+  // const rect = canvasRef.value!.getBoundingClientRect();
+  // const mouseX = e.clientX - rect.left;
+  // const mouseY = e.clientY - rect.top;
 
-  //3. 计算缩放前后的坐标偏移
-  const scaleFactor = newScale / currentScale.value;
-  offset.value = {
-    x: mouseX - (mouseX - offset.value.x) * scaleFactor,
-    y: mouseY - (mouseY - offset.value.y) * scaleFactor
-  };
+  // //3. 计算缩放前后的坐标偏移
+  // const scaleFactor = newScale / currentScale.value;
+  // offset.value = {
+  //   x: mouseX - (mouseX - offset.value.x) * scaleFactor,
+  //   y: mouseY - (mouseY - offset.value.y) * scaleFactor
+  // };
 
   drawImage();
 }
@@ -106,31 +109,31 @@ function handleWheel(e: WheelEvent) {
  * 点击开始拖拽
  * @param e 鼠标按下事件
  */
-function startDrag(e: MouseEvent) {
-  dragStart.value = { x: e.clientX, y: e.clientY };
-}
+// function startDrag(e: MouseEvent) {
+//   dragStart.value = { x: e.clientX, y: e.clientY };
+// }
 
 /**
  * 拖拽平移
  * @param e 鼠标移动事件
  */
-function handleDrag(e: MouseEvent) {
-  if (!dragStart.value) return;
+// function handleDrag(e: MouseEvent) {
+//   if (!dragStart.value) return;
 
-  //计算偏移
-  offset.value.x += e.clientX - dragStart.value.x;
-  offset.value.y += e.clientY - dragStart.value.y;
-  dragStart.value = { x: e.clientX, y: e.clientY };
+//   //计算偏移
+//   offset.value.x += e.clientX - dragStart.value.x;
+//   offset.value.y += e.clientY - dragStart.value.y;
+//   dragStart.value = { x: e.clientX, y: e.clientY };
 
-  drawImage();
-}
+//   drawImage();
+// }
 
 /**
  * 松开结束拖拽
  */
-function endDrag() {
-  dragStart.value = null;
-}
+// function endDrag() {
+//   dragStart.value = null;
+// }
 
 /**
  * 设置画布：读取传入的图片文件资源，存储到imgInstance中
@@ -143,6 +146,7 @@ function setCanvas(file: File) {
     imgInstance.onload = () => {
       resetView();
       drawImage();
+      emitter.emit('setCanvas', { width: imgInstance.width, height: imgInstance.height });
     };
     //保存图片数据到imgInstance中: <img>
     imgInstance.src = e.target?.result as string;
@@ -165,7 +169,7 @@ function resetView() {
   );
 
   currentScale.value = scale;
-  offset.value = { x: 0, y: 0 };
+  //offset.value = { x: 0, y: 0 };
 }
 
 /**
@@ -175,6 +179,7 @@ function drawImage() {
   if (!imgInstance || !canvasRef.value) {
     return;
   }
+
   const canvas = canvasRef.value;
 
   //main-canvas的窗口尺寸
@@ -195,11 +200,28 @@ function drawImage() {
   // 位置参数
   const scaledWidth = imgInstance.width * currentScale.value;
   const scaledHeight = imgInstance.height * currentScale.value;
-  const x = (canvas.width - scaledWidth) / 2 + offset.value.x;
-  const y = (canvas.height - scaledHeight) / 2 + offset.value.y;
+  const x = (canvas.width - scaledWidth) / 2; //+ offset.value.x;
+  const y = (canvas.height - scaledHeight) / 2; // + offset.value.y;
 
   ctx.drawImage(imgInstance, x, y, scaledWidth, scaledHeight);
 }
+
+emitter.on('change-size', (value: any) => {
+  handleChangeSize(value);
+});
+
+function handleChangeSize(newSize: { width: number; height: number }) {
+  const src = cv.imread(imgInstance);
+  const dst = new cv.Mat();
+  const dsize = new cv.Size(newSize.width, newSize.height);
+  // 你可以尝试更多不同的参数
+  cv.resize(src, dst, dsize, 0, 0, cv.INTER_AREA);
+  cv.imshow(canvasRef.value!, dst);
+  src.delete();
+  dst.delete();
+}
+
+//emitter.on('save-image', saveCurrentView);
 
 defineExpose({
   setCanvas

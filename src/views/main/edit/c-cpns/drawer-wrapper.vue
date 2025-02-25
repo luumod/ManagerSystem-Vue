@@ -1,7 +1,10 @@
 <template>
   <div class="navigation-bar">
     <el-button type="default" @click="handleCloseCurrentDrawer">关闭</el-button>
-    <e-button :config="{ id: 11, icon: 'edit', desc: '图像缩放', rounded: true, compact: true }">
+    <e-button
+      :config="{ id: 11, icon: 'edit', desc: '调整尺寸', rounded: true, compact: true }"
+      @click="emitter.emit('open-changeSize')"
+    >
     </e-button>
     <div class="separator" style=""></div>
     <e-button
@@ -20,12 +23,14 @@
 </template>
 
 <script setup lang="ts" name="navigation-bar">
+import emitter from '@/utils/emitter';
 import eButton from './e-button.vue';
 
 const emit = defineEmits(['clickCloseCurrentDrawer']);
 
 function handleCloseCurrentDrawer() {
   emit('clickCloseCurrentDrawer');
+  emitter.emit('close-current-drawer');
 }
 </script>
 

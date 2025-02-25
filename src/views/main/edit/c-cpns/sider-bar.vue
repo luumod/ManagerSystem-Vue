@@ -1,5 +1,6 @@
 <template>
   <div class="sider-bar">
+    <!-- 打开图片 -->
     <div class="flex flex-col items-center justify-center">
       <el-upload
         class="upload-btn"
@@ -13,17 +14,10 @@
       </el-upload>
     </div>
 
-    <div class="flex flex-col border-t-2" style="border-color: rgb(195, 195, 195)">
-      <div class="slider-demo-block">
-        <span class="demonstration">Default value</span>
-        <el-slider />
-      </div>
-      <div class="slider-demo-block">
-        <span class="demonstration">Default value</span>
-        <el-slider />
-      </div>
-    </div>
+    <!-- 不同的参数控制区域 -->
+    <component :is="activeOperationComponent" class="operation-container" v-bind="dynamicProps" />
 
+    <!--- 缩放图片区域 -->
     <div
       class="flex items-center justify-center border-t-2"
       style="border-color: rgb(195, 195, 195); padding-top: 20px"
@@ -40,6 +34,7 @@
       </button>
     </div>
 
+    <!-- 撤销与回退区域 -->
     <div
       class="flex items-center justify-center border-t-2"
       style="border-color: rgb(195, 195, 195); padding-top: 20px"
@@ -48,11 +43,12 @@
       <el-button icon="RefreshRight" size="large"></el-button>
     </div>
 
+    <!-- 保存图片区域 -->
     <div
       class="flex items-center justify-center border-t-2"
       style="border-color: rgb(195, 195, 195); padding-top: 20px"
     >
-      <el-button type="primary">保存图片</el-button>
+      <el-button type="primary" @click="emitter">保存图片</el-button>
     </div>
   </div>
 </template>
@@ -61,7 +57,10 @@
 import { LOGIN_TOKEN } from '@/global/constants';
 import { BASE_URL } from '@/service/config';
 import { localCache } from '@/utils/cache';
-import { ref } from 'vue';
+import { computed, ref, type DefineComponent } from 'vue';
+import ChangeSize from './operations/change-size.vue';
+import type { I_OpeartionProps } from '@/store/process/types';
+import emitter from '@/utils/emitter';
 
 const uploadUrl = ref(`${BASE_URL}/fake_upload`);
 const file_data = ref<File>();
@@ -70,6 +69,46 @@ function handleUploadSuccess(response: any, uploadFile: any) {
   file_data.value = uploadFile.raw;
   emit('uploadSuccess', file_data.value);
 }
+
+const change_size_config = ref<I_OpeartionProps>();
+emitter.on('setCanvas', (config: any) => {
+  change_size_config.value = config;
+});
+// 修改 dynamicProps 的计算逻辑
+const dynamicProps = computed(() => {
+  switch (activeOperation.value) {
+    case 'change-size':
+      return {
+        key: `${change_size_config.value?.width}-${change_size_config.value?.height}`, // 关键：强制刷新组件
+        width: change_size_config.value?.width,
+        height: change_size_config.value?.height
+      };
+    default:
+      return { key: Date.now() };
+  }
+});
+
+type OperationKey = 'change-size';
+
+const componentMap: { [key in OperationKey]: DefineComponent<I_OpeartionProps, any, any> } = {
+  'change-size': ChangeSize
+};
+
+const activeOperation = ref<OperationKey | null>(null);
+emitter.on('open-changeSize', () => {
+  activeOperation.value = 'change-size';
+});
+emitter.on('close-current-drawer', () => {
+  activeOperation.value = null;
+});
+
+// 动态计算组件
+const activeOperationComponent = computed(() => {
+  if (activeOperation.value) {
+    return componentMap[activeOperation.value];
+  }
+  return null;
+});
 </script>
 
 <style scoped lang="less">

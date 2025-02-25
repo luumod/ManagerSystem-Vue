@@ -41,12 +41,10 @@ function usePageContent(conditionRef: Ref<any>) {
    * @param pageSize 每页显示条数
    */
   function onChangePageSize(size: number) {
-    debugger;
     conditionRef.value.pageSize = size;
     contentRef.value?.fetchUserListData(conditionRef.value);
   }
   function onChangePageSizeImage(pageSize: number) {
-    debugger;
     conditionRef.value.pageSize = pageSize;
     contentRef.value?.fetchImageListData(conditionRef.value);
   }

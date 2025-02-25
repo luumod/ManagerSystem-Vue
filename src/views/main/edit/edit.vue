@@ -5,6 +5,7 @@
         <el-header>
           <navigation-bar
             v-show="navi_curr_idx === 0"
+            ref="navigationRef"
             @click-navigation-button="handleNaviClick"
           ></navigation-bar>
           <drawer-wrapper
@@ -24,7 +25,6 @@
 </template>
 
 <script setup lang="ts" name="edit">
-import cv from 'opencv-ts';
 import { ref } from 'vue';
 import NavigationBar from './c-cpns/navigation-bar.vue';
 import MainCanvas from './c-cpns/main-canvas.vue';
@@ -32,9 +32,9 @@ import SiderBar from './c-cpns/sider-bar.vue';
 import DrawerWrapper from './c-cpns/drawer-wrapper.vue';
 
 const mainCanvasRef = ref<InstanceType<typeof MainCanvas> | null>(null);
-const imageRef = ref<HTMLImageElement | null>(null);
-const canvasRef = ref<HTMLCanvasElement | null>(null);
 const navi_curr_idx = ref(0);
+const is_upload = ref(false);
+const navigationRef = ref<InstanceType<typeof NavigationBar> | null>(null);
 
 function handleNaviClick(idx: number) {
   navi_curr_idx.value = idx;
@@ -47,28 +47,9 @@ function handleCloseDrawer() {
 }
 
 function handleUploadSuccess(file: File) {
+  is_upload.value = true;
+  navigationRef.value!.isCanClick = true;
   mainCanvasRef.value?.setCanvas(file);
-}
-
-function handleFileChange(event: any) {
-  const file = event.target as HTMLInputElement;
-  if (file.files?.[0]) {
-    const url = URL.createObjectURL(file.files[0]);
-    if (imageRef.value) {
-      imageRef.value.src = url;
-    }
-  }
-}
-
-function showImageInCanvas() {
-  if (imageRef.value && canvasRef.value) {
-    const mat = cv.imread(imageRef.value);
-    if (mat.empty()) {
-      return;
-    }
-    cv.imshow(canvasRef.value, mat);
-    mat.delete();
-  }
 }
 </script>
 
